@@ -1,0 +1,18 @@
+{
+  "imports": {
+    "src/": "./src/",
+    "dist/": "./dist/",
+    "~pages": "./src/pages.d.ts",
+    "react": "https://esm.sh/react@17.0.2",
+    "react-dom": "https://esm.sh/react-dom@17.0.2",
+    "react-dom/": "https://esm.sh/react-dom@17.0.2/",
+    "react/jsx-runtime": "https://esm.sh/react@17.0.2/jsx-runtime",
+    "raf/polyfill": "http://esm.sh/raf@3.4.1/polyfill",
+    "oak/": "https://deno.land/x/oak@v10.1.0/",
+    "zod": "https://deno.land/x/zod@v3.11.4/mod.ts",
+    "std/": "https://deno.land/std@0.120.0/",
+    "chemin": "https://deno.land/x/chemin@v8.0.0/mod.ts",
+    "history": "http://esm.sh/history@5.2.0",
+    "zenjson": "https://deno.land/x/zenjson@v1.0.2/mod.ts"
+  }
+}
