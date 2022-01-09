@@ -27,9 +27,9 @@ export function pagesPlugin(option: UserOptions = {}): Array<Plugin> {
       if (isProd && ssr) {
         return;
       }
-      // Remove ssr in "pages" in browser build
+      // Remove getServerSideProps in "pages" in browser build
       if (filepath.startsWith(optionResolved.pageDir)) {
-        return ["ssr"];
+        return ["getServerSideProps"];
       }
     },
   });

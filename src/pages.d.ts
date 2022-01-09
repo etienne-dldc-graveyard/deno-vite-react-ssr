@@ -7,34 +7,23 @@ declare module "~pages" {
 
   export type Path<Params> = { params: Params };
 
-  export type PropsResult<Props> =
+  export type GetServerSidePropsResult<Props> =
     | { notFound: true }
     | { redirect: Redirect }
-    | {
-        props: Props;
-        /**
-         * This does not work like NextJS because we never SSG
-         * so `true` is default (ssr)
-         * and `false` is ssr once then kee in cache
-         */
-        revalidate?: number | boolean;
-      };
+    | { props: Props };
 
-  export type Context<Params> = {
+  export type GetServerSidePropsContext<Params> = {
     query: Params;
   };
 
-  export type SSROptions<Props = {}, Params = {}> = {
-    props?(
-      context: Context<Params>
-    ): PropsResult<Props> | Promise<PropsResult<Props>>;
-    paths?(
-      context: Context<Params>
-    ): Array<Path<Params>> | Promise<Array<Path<Params>>>;
-  };
+  export type GetServerSideProps<Props = {}, Params = {}> = (
+    context: GetServerSidePropsContext<Params>
+  ) =>
+    | Promise<GetServerSidePropsResult<Props>>
+    | GetServerSidePropsResult<Props>;
 
   export type PageModule = {
-    ssr?: SSROptions<any, any>;
+    getServerSideProps?: GetServerSideProps<any, any>;
     default: React.ComponentType<any>;
   };
 

@@ -1,18 +1,14 @@
 import React from "react";
-import { SSROptions } from "~pages";
+import { GetServerSideProps } from "~pages";
 
 type Props = {
   now: Date;
 };
 
-export const ssr: SSROptions<Props> = {
-  props() {
-    return {
-      props: {
-        now: new Date(),
-      },
-    };
-  },
+export const getServerSideProps: GetServerSideProps<Props> = () => {
+  return {
+    props: { now: new Date() },
+  };
 };
 
 export default function Home({ now }: Props) {

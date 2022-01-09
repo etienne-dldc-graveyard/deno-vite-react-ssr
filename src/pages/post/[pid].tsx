@@ -1,5 +1,5 @@
 import React from "react";
-import { SSROptions } from "~pages";
+import { GetServerSideProps } from "~pages";
 
 type Params = {
   pid: string;
@@ -9,14 +9,14 @@ type Props = {
   pid: string;
 };
 
-export const ssr: SSROptions<Props, Params> = {
-  props({ query }) {
-    return {
-      props: {
-        pid: query.pid,
-      },
-    };
-  },
+export const getServerSideProps: GetServerSideProps<Props, Params> = ({
+  query,
+}) => {
+  return {
+    props: {
+      pid: query.pid,
+    },
+  };
 };
 
 export default function PostByPid({ pid }: Props) {

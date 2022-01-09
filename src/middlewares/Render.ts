@@ -5,7 +5,11 @@ import { Middleware } from "../types.ts";
 import { resolve } from "std/path/mod.ts";
 import { matchRoute, pagesToRoutes, RouteMatch } from "../logic/router.ts";
 import { sanitize } from "zenjson";
-import { Context, Redirect, SSROptions } from "~pages";
+import {
+  Redirect,
+  GetServerSideProps,
+  GetServerSidePropsContext,
+} from "~pages";
 import { isHttpError, Status } from "oak/mod.ts";
 import { Chemin } from "chemin";
 import { notNil } from "../logic/utils.ts";
@@ -43,11 +47,11 @@ export function Render(): Middleware {
       return;
     }
     const { route, params } = match;
-    const { default: Component, ssr } = await route.module();
-    const context: Context<any> = {
+    const { default: Component, getServerSideProps } = await route.module();
+    const context: GetServerSidePropsContext<any> = {
       query: params,
     };
-    const propsResult = await resolveProps(ssr, context);
+    const propsResult = await resolveProps(getServerSideProps, context);
     const props = (propsResult as any)?.props ?? {};
     // TODO: Handle error / redirect...
     const content = render(Component, props);
@@ -82,25 +86,21 @@ type PropsResultResolved =
   | { kind: "noProps" }
   | { kind: "notFound" }
   | { kind: "redirect"; redirect: Redirect }
-  | {
-      kind: "props";
-      props: Record<string, unknown>;
-      revalidate?: number | boolean;
-    };
+  | { kind: "props"; props: Record<string, unknown> };
 
 async function resolveProps(
-  ssr: SSROptions | undefined,
-  context: Context<any>
+  getServerSideProps: GetServerSideProps | undefined,
+  context: GetServerSidePropsContext<any>
 ): Promise<PropsResultResolved> {
-  if (!ssr || !ssr.props) {
+  if (!getServerSideProps) {
     return { kind: "noProps" };
   }
-  const result = await ssr.props(context);
+  const result = await getServerSideProps(context);
   if ("notFound" in result) {
     return { kind: "notFound" };
   }
   if ("redirect" in result) {
     return { kind: "redirect", redirect: result.redirect };
   }
-  return { kind: "props", props: result.props, revalidate: result.revalidate };
+  return { kind: "props", props: result.props };
 }
