@@ -1,5 +1,7 @@
 # React SSR running on Deno (powered by Vite)
 
+## ⚠️ Experimental: this is not a working project ⚠️
+
 ## What is this project
 
 You can think of this as an alternative to [Next](https://nextjs.org/) that runs in [Deno](https://deno.land/) instead of Node (maybe I should call this `entx` 🙃).
