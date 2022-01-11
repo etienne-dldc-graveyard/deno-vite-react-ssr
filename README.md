@@ -27,7 +27,15 @@ You need Deno, Node and [Yarn](https://classic.yarnpkg.com/lang/en/) installed f
 Once deployed the app only needs Deno.
 
 - Install Node's deps with `yarn install`
-- Run the build with `yarn run build`
-- Start the server by runing the VSCode task `Run server`
 
-**Note**: For now you have to run `yarn run build` again when you change the code to update the app.
+### Dev mode
+
+- Start the build with `yarn run dev`
+- Start the server by runing the VSCode task `Run server` (you need to have [Denon](https://github.com/denosaurs/denon) installed)
+
+**Note**: Hot reloading is not working yet but you don't have to restart the server, just manually refresh the page to see your changes.
+
+### Prod
+
+- Build the app with `yarn run build`
+- Then deploy the app and run `src/server.ts` with Deno

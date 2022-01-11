@@ -35,8 +35,7 @@ export function denoPlugin({ importMap = { imports: {} } }: Options): Plugin {
         }
         return resolvedId;
       }
-      // return resolvedId;
-      return null;
+      return resolvedId;
     },
     async load(id) {
       if (id.startsWith("http")) {

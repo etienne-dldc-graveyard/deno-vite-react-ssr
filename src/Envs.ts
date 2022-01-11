@@ -1,6 +1,7 @@
 import * as zod from "zod";
 
 const EnvsSchema = zod.object({
+  MODE: zod.union([zod.literal("development"), zod.literal("production")]),
   PORT: zod
     .string()
     .nonempty()

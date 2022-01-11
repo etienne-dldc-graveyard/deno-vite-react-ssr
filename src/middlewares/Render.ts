@@ -1,9 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import ssrManifest from "dist/client/ssr-manifest.json" assert { type: "json" };
-import { pages, render } from "dist/server/entry-server.js";
 import { Middleware } from "../types.ts";
-import { resolve } from "std/path/mod.ts";
-import { matchRoute, pagesToRoutes, RouteMatch } from "../logic/router.ts";
+import { matchRoute, RouteMatch } from "src/logic/router.ts";
 import { sanitize } from "zenjson";
 import {
   Redirect,
@@ -11,22 +8,13 @@ import {
   GetServerSidePropsContext,
 } from "~pages";
 import { isHttpError, Status } from "oak/mod.ts";
-import { Chemin } from "chemin";
-import { notNil } from "../logic/utils.ts";
 import { BridgeData, BRIDGE_DATA_ID } from "../logic/bridge.ts";
-
-const routes = pagesToRoutes(pages, ssrManifest);
-
-const notFoundRoute = notNil(
-  routes.find((route) => route.route.equal(Chemin.create("404")))
-);
-
-const indexHtml = Deno.readTextFileSync(
-  resolve(Deno.cwd(), "dist/client/index.html")
-);
+import { getGeneratedData } from "../logic/GeneratedDataManager.ts";
 
 export function Render(): Middleware {
   return async (ctx, next) => {
+    const { indexHtml, routes, render, notFoundRoute } =
+      await getGeneratedData();
     const pathname = ctx.request.url.pathname;
     const match = await (async (): Promise<RouteMatch | null> => {
       const match = matchRoute(routes, pathname);

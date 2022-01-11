@@ -11,9 +11,6 @@ type MatchFunction = (
 const removeExportsTyped: (options: { match: MatchFunction }) => Plugin =
   removeExports as any;
 
-const EXTENSION_REG = /\.tsx?$/;
-const PAGE_MODULE_ID = "~pages";
-
 export type UserOptions = {
   pagesDir?: string;
 };
@@ -42,33 +39,7 @@ export function pagesPlugin(option: UserOptions = {}): Array<Plugin> {
         return conf;
       },
     },
-    extractPagesPlugin(optionResolved),
   ];
-}
-
-function extractPagesPlugin(options: ResolvedOptions): Plugin {
-  let ctx: PageContext;
-
-  return {
-    name: "vite-plugin-pages",
-    enforce: "pre",
-    configResolved() {
-      ctx = new PageContext(options);
-      ctx.init();
-    },
-    resolveId(source) {
-      if (source === PAGE_MODULE_ID) {
-        return PAGE_MODULE_ID;
-      }
-      return null;
-    },
-    load(id) {
-      if (id === PAGE_MODULE_ID) {
-        return ctx.getPagesModuleContent();
-      }
-      return null;
-    },
-  };
 }
 
 export type ResolvedOptions = {
@@ -82,35 +53,4 @@ function resolveOption({
   return {
     pageDir: pageDirResolved,
   };
-}
-
-class PageContext {
-  private readonly options: ResolvedOptions;
-  private files: string[] = [];
-
-  constructor(options: ResolvedOptions) {
-    this.options = options;
-  }
-
-  init() {
-    const files = glob.sync("**/*", {
-      cwd: this.options.pageDir,
-      nodir: true,
-    });
-
-    this.files = files.filter((file) => {
-      if (!EXTENSION_REG.test(file)) {
-        return false;
-      }
-      return true;
-    });
-  }
-
-  getPagesModuleContent(): string {
-    const items = this.files.map((page) => {
-      return `{ path: "${page}", module: () => import("./src/pages/${page}") }`;
-    });
-
-    return [`export default [${items.join(",")}];`].join("\n");
-  }
 }

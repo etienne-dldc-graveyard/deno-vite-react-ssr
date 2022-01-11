@@ -2,20 +2,11 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run server",
+      "label": "denon start",
       "type": "process",
-      "command": "deno",
-      "args": [
-        "run",
-        "-A",
-        "--unstable",
-        "--no-check",
-        "--import-map=import_map.json",
-        "--watch",
-        "src/server.ts"
-      ],
-      "problemMatcher": ["$deno"],
-      "options": { "env": { "PORT": "3001" } }
+      "command": "denon",
+      "args": ["start"],
+      "problemMatcher": ["$deno"]
     }
   ]
 }

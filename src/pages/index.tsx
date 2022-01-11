@@ -12,5 +12,5 @@ export const getServerSideProps: GetServerSideProps<Props> = () => {
 };
 
 export default function Home({ now }: Props) {
-  return <div>Homepage: {now.toDateString()}</div>;
+  return <div>Homepage: {now.toDateString()} YAY</div>;
 }
