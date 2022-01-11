@@ -1,12 +1,12 @@
+import "./style/index.css";
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import pages from "~pages";
-import { pagesToRoutes } from "./logic/router.ts";
+import { pagesToRoutes } from "src/logic/Route.ts";
 import { createBrowserHistory } from "history";
 import { restore } from "zenjson";
-import { getBridgeData } from "./logic/bridge.ts";
-import { notNil } from "./logic/utils.ts";
+import { getBridgeData } from "src/logic/Bridge.ts";
+import { notNil } from "src/logic/Utils.ts";
 
 main().catch(console.error);
 

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Middleware } from "src/server/types.ts";
-import { matchRoute, RouteMatch } from "src/logic/router.ts";
+import { matchRoute, RouteMatch } from "src/logic/Route.ts";
 import { sanitize } from "zenjson";
 import {
   Redirect,
@@ -8,7 +8,7 @@ import {
   GetServerSidePropsContext,
 } from "~pages";
 import { isHttpError, Status } from "oak/mod.ts";
-import { BridgeData, BRIDGE_DATA_ID } from "src/logic/bridge.ts";
+import { BridgeData, BRIDGE_DATA_ID } from "src/logic/Bridge.ts";
 import { getGeneratedData } from "src/server/GeneratedDataManager.ts";
 
 export function Render(): Middleware {

@@ -7,6 +7,13 @@
       "command": "denon",
       "args": ["start"],
       "problemMatcher": ["$deno"]
+    },
+    {
+      "label": "denon cache",
+      "type": "process",
+      "command": "denon",
+      "args": ["cache"],
+      "problemMatcher": ["$deno"]
     }
   ]
 }

@@ -1,9 +1,9 @@
-import { pagesToRoutes, Route } from "src/logic/router.ts";
+import { pagesToRoutes, Route } from "src/logic/Route.ts";
 import { resolve } from "std/path/mod.ts";
-import { notNil } from "src/logic/utils.ts";
+import { notNil } from "src/logic/Utils.ts";
 import { Chemin } from "chemin";
 import { nanoid } from "nanoid";
-import { Envs } from "../Envs.ts";
+import { Envs } from "src/server/Envs.ts";
 
 export type GeneratedData = {
   indexHtml: string;

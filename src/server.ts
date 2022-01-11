@@ -1,16 +1,16 @@
 import { Application, ContextSendOptions, Status } from "oak/mod.ts";
-import { Middleware, State } from "./types.ts";
-import { Envs } from "./Envs.ts";
-import { ErrorToJson } from "./middlewares/ErrorToJson.ts";
-import { NotFound } from "./middlewares/NotFound.ts";
-import { resolve } from "std/path/mod.ts";
-import { Route } from "./router/Route.ts";
-import { Router } from "./router/Router.ts";
-import { AllowedMethodsRoutes } from "./router/AllowedMethodsRoutes.ts";
+import { Middleware, State } from "src/server/types.ts";
+import { Envs } from "src/server/Envs.ts";
+import { ErrorToJson } from "src/server/ErrorToJson.ts";
+import { NotFound } from "src/server/NotFound.ts";
+import { Route } from "src/server/Route.ts";
+import { Router } from "src/server/Router.ts";
+import { AllowedMethodsRoutes } from "src/server/AllowedMethodsRoutes.ts";
 import { Chemin, CheminParam as P } from "chemin";
-import { notNil } from "./logic/utils.ts";
-import { Render } from "./middlewares/Render.ts";
-import { invalidateGeneratedData } from "./logic/GeneratedDataManager.ts";
+import { notNil } from "./logic/Utils.ts";
+import { Render } from "src/server/Render.ts";
+import { invalidateGeneratedData } from "src/server/GeneratedDataManager.ts";
+import { projectPath } from "src/server/Utils.ts";
 
 const app = new Application<State>({
   state: {
@@ -68,49 +68,15 @@ const routes = AllowedMethodsRoutes([
   Route.GET(APP_PATH, Render()),
 ]);
 
-console.log(
-  routes.map((route) => {
-    return {
-      pattern: route.pattern?.stringify(),
-      exact: route.exact,
-      method: route.method,
-      isFallback: route.isFallback,
-    };
-  })
-);
-
-app.use(Router(routes));
-
-// apiRouter.get("/api", (ctx) => {
-//   ctx.response.body = { ok: true };
-// });
-
-// console.log(Envs.MODE);
-
-// if (Envs.MODE === "development") {
-//   console.log("add /dev/generated");
-//   app.use(
-//     StaticRoute("/dev/generated", {
-//       root: projectPath("src/generated"),
-//     })
-//   );
-//   app.use(Route("/dev/invalidate", () => {}));
-// }
-
-// app.use(ErrorToJson("/api"));
-// app.use(Render());
-// app.use(
-//   StaticRoute("/assets", {
-//     root: projectPath("src/generated/assets"),
+// console.log(
+//   routes.map(({ exact, pattern, isFallback, method }) => {
+//     return { pattern: pattern?.stringify(), exact, method, isFallback };
 //   })
 // );
-// app.use(NotFound);
+
+app.use(Router(routes));
 
 app.addEventListener("listen", () => {
   console.info(`Server is listening on http://localhost:${Envs.PORT}`);
 });
 await app.listen({ port: Envs.PORT });
-
-function projectPath(...parts: Array<string>): string {
-  return resolve(Deno.cwd(), ...parts);
-}
