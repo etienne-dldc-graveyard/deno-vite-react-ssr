@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import pages from "~pages";
-import { matchRoute, pagesToRoutes } from "./logic/router.ts";
+import { pagesToRoutes } from "./logic/router.ts";
 import { createBrowserHistory } from "history";
 import { restore } from "zenjson";
 import { getBridgeData } from "./logic/bridge.ts";

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file ban-types no-explicit-any
 import React from "react";
 
 export type Redirect = { destination: string; permanent: boolean };

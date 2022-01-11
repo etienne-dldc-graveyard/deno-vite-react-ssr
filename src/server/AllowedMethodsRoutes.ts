@@ -1,5 +1,5 @@
 import { HTTPMethods, composeMiddleware } from "oak/mod.ts";
-import { Middleware } from "../types.ts";
+import { Middleware } from "src/server/types.ts";
 import { Route, Routes } from "./Route.ts";
 
 const ALL_METHODS: Set<HTTPMethods> = new Set<HTTPMethods>([

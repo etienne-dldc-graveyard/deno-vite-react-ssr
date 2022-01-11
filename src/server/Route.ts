@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { composeMiddleware, HTTPMethods } from "oak/mod.ts";
-import { Middleware } from "../types.ts";
+import { Middleware } from "src/server/types.ts";
 import { Chemin, splitPathname } from "chemin";
 
 export const ROUTE_TOKEN = Symbol.for("__TUMAU_ROUTE_TOKEN__");

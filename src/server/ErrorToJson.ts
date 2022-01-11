@@ -1,5 +1,5 @@
 import { isHttpError, Status } from "oak/mod.ts";
-import { Middleware } from "../types.ts";
+import { Middleware } from "src/server/types.ts";
 
 export function ErrorToJson(): Middleware {
   return async (ctx, next) => {

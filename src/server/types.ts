@@ -1,5 +1,5 @@
 import * as oak from "oak/mod.ts";
-import { RouterContext } from "./router/Router.ts";
+import { RouterContext } from "src/server/Router.ts";
 
 export type State = {
   router: RouterContext | null;

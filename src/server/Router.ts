@@ -1,6 +1,6 @@
 import { FindResult, Route, Routes } from "./Route.ts";
 import { Chemin } from "chemin";
-import { Middleware } from "../types.ts";
+import { Middleware } from "src/server/types.ts";
 
 export interface Params {
   [key: string]: unknown;
