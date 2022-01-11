@@ -14,12 +14,11 @@ function createConfig(
   config: InlineConfig
 ): InlineConfig {
   const baseConfig: InlineConfig = {
+    configFile: projectPath("vite.config.ts"),
     mode: mode,
-    root: process.cwd(),
     logLevel: mode === "development" ? "silent" : "info",
     clearScreen: false,
     build: {
-      watch: { exclude: ["src/generated/**"] },
       emptyOutDir: mode === "development" ? false : true,
     },
   };
@@ -37,7 +36,7 @@ export function buildClient(mode: "development" | "production") {
   return createBuild(
     createConfig(mode, {
       build: {
-        outDir: "./dist/client",
+        outDir: projectPath("dist/client"),
         ssrManifest: true,
       },
     })
@@ -48,8 +47,13 @@ export function buildServer(mode: "development" | "production") {
   return createBuild(
     createConfig(mode, {
       build: {
-        outDir: "./dist/server",
-        ssr: "src/render.tsx",
+        outDir: projectPath("dist/server"),
+        ssr: "./render.tsx",
+        rollupOptions: {
+          output: {
+            format: "esm",
+          },
+        },
       },
     })
   );

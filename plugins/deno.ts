@@ -11,22 +11,6 @@ export function denoPlugin({ importMap = { imports: {} } }: Options): Plugin {
   return {
     enforce: "pre",
     name: "vite-plugin-deno",
-    config: (config) => {
-      return {
-        ...config,
-        build: {
-          ...config.build,
-          rollupOptions: {
-            ...config.build?.rollupOptions,
-            output: {
-              ...config.build?.rollupOptions?.output,
-              // force esm in ssr
-              format: "esm",
-            },
-          },
-        },
-      };
-    },
     resolveId(source, importer, { ssr }) {
       const resolvedId = resolve(source, importMap, importer);
       if (resolvedId.startsWith("http")) {

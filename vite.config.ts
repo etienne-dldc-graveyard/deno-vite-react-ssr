@@ -6,10 +6,13 @@ import { pagesPlugin } from "./plugins/pages";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  root: "./src",
   plugins: [
     react({ jsxRuntime: "classic" }),
     ...pagesPlugin(),
     denoPlugin({ importMap }),
   ],
-  resolve: {},
+  build: {
+    watch: { exclude: ["generated/**"] },
+  },
 });
