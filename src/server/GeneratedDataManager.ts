@@ -7,7 +7,7 @@ import { Envs } from "src/server/Envs.ts";
 
 export type GeneratedData = {
   indexHtml: string;
-  render: typeof import("generated/render.js").render;
+  render: typeof import("../render.tsx").render;
   routes: Route[];
   notFoundRoute: Route;
 };

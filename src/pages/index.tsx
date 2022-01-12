@@ -1,5 +1,6 @@
 import React from "react";
 import { GetServerSideProps } from "~pages";
+import { useCreateLinkProps } from "src/hooks/useCreateLinkProps.ts";
 
 type Props = {
   now: Date;
@@ -12,5 +13,14 @@ export const getServerSideProps: GetServerSideProps<Props> = () => {
 };
 
 export default function Home({ now }: Props) {
-  return <div>Homepage: {now.toDateString()} YAY</div>;
+  const clp = useCreateLinkProps();
+
+  return (
+    <div>
+      Homepage: {now.toDateString()} YAY
+      <div>
+        <a {...clp("/demo/hello")}>/demo/hello</a>
+      </div>
+    </div>
+  );
 }

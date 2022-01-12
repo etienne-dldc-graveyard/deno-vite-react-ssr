@@ -1,18 +1,19 @@
 // deno-lint-ignore-file no-explicit-any
 import { Middleware } from "src/server/types.ts";
 import { matchRoute, RouteMatch } from "src/logic/Route.ts";
-import { sanitize } from "zenjson";
 import {
   Redirect,
   GetServerSideProps,
   GetServerSidePropsContext,
 } from "~pages";
 import { isHttpError, Status } from "oak/mod.ts";
-import { BridgeData, BRIDGE_DATA_ID } from "src/logic/Bridge.ts";
+import { BRIDGE_DATA_ID, createBridgeData } from "src/logic/Bridge.ts";
 import { getGeneratedData } from "src/server/GeneratedDataManager.ts";
+import { ServerRouter } from "./ServerRouter.ts";
 
 export function Render(): Middleware {
   return async (ctx, next) => {
+    const router = new ServerRouter(ctx.request.url);
     const { indexHtml, routes, render, notFoundRoute } =
       await getGeneratedData();
     const pathname = ctx.request.url.pathname;
@@ -42,12 +43,7 @@ export function Render(): Middleware {
     const propsResult = await resolveProps(getServerSideProps, context);
     const props = (propsResult as any)?.props ?? {};
     // TODO: Handle error / redirect...
-    const content = render(Component, props);
-    const data: BridgeData = {
-      route: route.id,
-      props: sanitize(props) as any,
-      params: sanitize(params) as any,
-    };
+    const content = render(router, Component, props);
     const assets = route.assets
       .map((asset) => {
         return `<script src="${asset}"></script>`;
@@ -57,8 +53,12 @@ export function Render(): Middleware {
       .replace(`<!--app-html-->`, content)
       .replace(
         `<!--app-scripts-->`,
-        `<script id="${BRIDGE_DATA_ID}" type="application/json">${JSON.stringify(
-          data
+        `<script id="${BRIDGE_DATA_ID}" type="application/json">${createBridgeData(
+          {
+            route: route.id,
+            props: props,
+            params: params,
+          }
         )}</script>`
       )
       .replace(`<!--app-assets-->`, assets);
