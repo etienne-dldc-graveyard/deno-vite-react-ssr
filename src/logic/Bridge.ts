@@ -1,6 +1,7 @@
+// deno-lint-ignore-file no-explicit-any
 import { sanitize, restore } from "zenjson";
+import { Router } from "./Router.ts";
 
-// deno-lint-ignore-file no-explicit-any no-explicit-any
 export type BridgeData = {
   props: Record<string, unknown>;
   route: string;
@@ -18,3 +19,9 @@ export function getBridgeData(): BridgeData {
     JSON.parse(document.getElementById(BRIDGE_DATA_ID)!.textContent ?? "{}")
   ) as any;
 }
+
+export type Render = (
+  router: Router,
+  Component: React.ComponentType<any>,
+  props: any
+) => JSX.Element;

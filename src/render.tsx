@@ -1,21 +1,11 @@
-// deno-lint-ignore-file no-explicit-any
-import "raf/polyfill";
 import React from "react";
-import ReactDOMServer from "react-dom/server";
-import pages from "~pages";
-import { Router } from "src/logic/Router.ts";
-import { Root } from "src/views/Root.tsx";
+import { Render } from "src/logic/Bridge.ts";
+import { Root } from "./views/Root.tsx";
 
-export { pages };
-
-export function render(
-  router: Router,
-  Component: React.ComponentType<any>,
-  props: any
-): string {
-  return ReactDOMServer.renderToString(
+export const render: Render = (router, Component, props) => {
+  return (
     <Root router={router}>
       <Component {...props} />
     </Root>
   );
-}
+};

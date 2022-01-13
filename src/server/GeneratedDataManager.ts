@@ -4,10 +4,11 @@ import { notNil } from "src/logic/Utils.ts";
 import { Chemin } from "chemin";
 import { nanoid } from "nanoid";
 import { Envs } from "src/server/Envs.ts";
+import { Render } from "src/logic/Bridge.ts";
 
 export type GeneratedData = {
   indexHtml: string;
-  render: typeof import("../render.tsx").render;
+  render: Render;
   routes: Route[];
   notFoundRoute: Route;
 };

@@ -10,7 +10,11 @@ export class ServerRouter implements Router {
     });
   }
 
-  get location(): Location {
+  get nextLocation(): Location | null {
+    return null;
+  }
+
+  get activeLocation(): Location {
     return this.history.location;
   }
 

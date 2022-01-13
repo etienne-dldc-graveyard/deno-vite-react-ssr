@@ -176,3 +176,11 @@ function groupByPattern(routes: Array<Route>): Array<GroupResult> {
   });
   return result;
 }
+
+export function debugRoutes(routes: Routes) {
+  console.log(
+    routes.map(({ exact, pattern, isFallback, method }) => {
+      return { pattern: pattern?.stringify(), exact, method, isFallback };
+    })
+  );
+}

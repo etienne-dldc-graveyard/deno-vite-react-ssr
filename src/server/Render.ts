@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Middleware } from "src/server/types.ts";
 import { matchRoute, RouteMatch } from "src/logic/Route.ts";
+import { Chemin, CheminParam as P } from "chemin";
 import {
   Redirect,
   GetServerSideProps,
@@ -10,13 +11,18 @@ import { isHttpError, Status } from "oak/mod.ts";
 import { BRIDGE_DATA_ID, createBridgeData } from "src/logic/Bridge.ts";
 import { getGeneratedData } from "src/server/GeneratedDataManager.ts";
 import { ServerRouter } from "./ServerRouter.ts";
+import { renderToString } from "react-dom/server";
+import { notNil } from "src/logic/Utils.ts";
+
+export const RENDER_PATH = Chemin.create(P.multiple(P.string("path")));
 
 export function Render(): Middleware {
   return async (ctx, next) => {
     const router = new ServerRouter(ctx.request.url);
+    const { path } = notNil(ctx.state.router).getOrFail(RENDER_PATH);
     const { indexHtml, routes, render, notFoundRoute } =
       await getGeneratedData();
-    const pathname = ctx.request.url.pathname;
+    const pathname = path.join("/");
     const match = await (async (): Promise<RouteMatch | null> => {
       const match = matchRoute(routes, pathname);
       if (match) {
@@ -43,7 +49,7 @@ export function Render(): Middleware {
     const propsResult = await resolveProps(getServerSideProps, context);
     const props = (propsResult as any)?.props ?? {};
     // TODO: Handle error / redirect...
-    const content = render(router, Component, props);
+    const content = renderToString(render(router, Component, props));
     const assets = route.assets
       .map((asset) => {
         return `<script src="${asset}"></script>`;
