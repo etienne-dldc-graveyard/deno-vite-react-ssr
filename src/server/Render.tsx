@@ -20,7 +20,11 @@ export function Render(): Middleware {
     const path: Path = { pathname, search, hash };
     const resolved = await resolvePage(path);
     if (resolved.kind === "redirect") {
-      throw new Error("Redirects are not implemented yet");
+      ctx.response.redirect(resolved.redirect.destination);
+      if (resolved.redirect.permanent) {
+        console.warn(`redirect.permanent is not implemented`);
+      }
+      return;
     }
     if (resolved.isNotFound) {
       try {

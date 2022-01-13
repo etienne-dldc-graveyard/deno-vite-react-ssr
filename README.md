@@ -21,8 +21,6 @@ This is a very early experiment but right now a very basic version `getServerSid
 
 The next steps are:
 
-- Handle Redirect both on the client and server side
-- Cancel previous props fetching when client side navigation occurs to prevent race condition
 - Handle Errors
 - Integrate [react-helmet-async](https://github.com/staylor/react-helmet-async)
 - Handle `revalidate` to cache

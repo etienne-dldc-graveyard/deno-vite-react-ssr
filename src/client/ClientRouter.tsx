@@ -14,6 +14,7 @@ import { notNil } from "src/logic/Utils.ts";
 import { Chemin } from "chemin";
 import { Subscription } from "suub";
 import { restore } from "zenjson";
+import { nanoid } from "nanoid";
 
 export type OnServerSideProps = (location: Location, props: any) => void;
 
@@ -34,6 +35,7 @@ export class ClientRouter implements Router {
   private readonly subscription = Subscription<ActiveRoute>();
 
   private activeRoute: ActiveRoute | null = null;
+  private requestId = "";
 
   constructor({ onServerSideProps, pages }: ClientRouterOptions) {
     this.routes = pagesToRoutes(pages);
@@ -52,9 +54,16 @@ export class ClientRouter implements Router {
   private onLocationChange({ location }: Update) {
     const nextRoute: RouteMatch =
       matchRoute(this.routes, location.pathname) ?? this.notFoundRouteMatch;
+    const requestId = nanoid(12);
+    this.requestId = requestId;
     this.resolveRouteMatch(nextRoute, location).then(({ props, Component }) => {
+      if (requestId !== this.requestId) {
+        // canceled by another navigation
+        return;
+      }
       if (props.kind === "redirect") {
-        throw new Error("Redirect not implemented");
+        this.replace(props.redirect.destination);
+        return;
       }
       this.activeRoute = {
         location,
@@ -92,7 +101,7 @@ export class ClientRouter implements Router {
     );
     this.onServerSideProps(location, props);
     if (props.kind === "redirect") {
-      throw new Error("Unexpected redirect props result");
+      throw new Error("Unexpected redirect on in itialize");
     }
     this.activeRoute = {
       location,
@@ -131,7 +140,7 @@ export class ClientRouter implements Router {
 
   get route(): ActiveRoute {
     if (!this.activeRoute) {
-      throw new Error("Route not initialized");
+      throw new Error("Router not initialized");
     }
     return this.activeRoute;
   }
