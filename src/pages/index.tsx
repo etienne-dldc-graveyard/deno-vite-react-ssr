@@ -17,7 +17,7 @@ export default function Home({ now }: Props) {
 
   return (
     <div>
-      Homepage: {now.toDateString()} YAY
+      Homepage: {now.toDateString()} - {now.toLocaleTimeString()} YAY
       <div>
         <a {...clp("/demo/hello")}>/demo/hello</a>
       </div>

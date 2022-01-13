@@ -1,5 +1,16 @@
 import React from "react";
+import { GetServerSideProps } from "~pages";
 
-export default function Hello() {
-  return <div>Youpi</div>;
+type Props = {
+  now: Date;
+};
+
+export const getServerSideProps: GetServerSideProps<Props> = () => {
+  return {
+    props: { now: new Date() },
+  };
+};
+
+export default function Hello({ now }: Props) {
+  return <div>Youpi: {now.getTime()}</div>;
 }

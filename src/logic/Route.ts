@@ -4,14 +4,16 @@ import { Chemin, CheminParamAny, CheminParam } from "chemin";
 
 export type Route = {
   id: string; // file path
-  route: Chemin;
+  chemin: Chemin;
   module: () => Promise<PageModule>;
   assets: Array<string>;
 };
 
+export type SsrManifest = Record<string, Array<string>>;
+
 export function pagesToRoutes(
   pages: Array<Page>,
-  ssrManifest?: Record<string, Array<string>>
+  ssrManifest?: SsrManifest
 ): Array<Route> {
   const EXTENSION_REGEX = /\.(js|ts|tsx|jsx)$/;
   const BASIC_ROUTE_REGEX = /^([\w-]+)$/;
@@ -28,7 +30,7 @@ export function pagesToRoutes(
         if (parts[parts.length - 1] === "index") {
           parts.pop();
         }
-        const route = Chemin.create(
+        const chemin = Chemin.create(
           ...parts.map((part): CheminParamAny => {
             const optionalCatchAll = part.match(OPTIONAL_CATCH_ALL_ROUTE_REGEX);
             if (optionalCatchAll) {
@@ -56,7 +58,7 @@ export function pagesToRoutes(
         const assets = ssrManifest ? (ssrManifest as any)[page.path] ?? [] : [];
         return {
           id: page.path,
-          route,
+          chemin,
           module: page.module,
           assets,
         };
@@ -77,7 +79,7 @@ export function matchRoute(
   pathname: string
 ): RouteMatch | null {
   for (const route of routes) {
-    const match = route.route.matchExact(pathname);
+    const match = route.chemin.matchExact(pathname);
     if (match) {
       return { route, params: match };
     }

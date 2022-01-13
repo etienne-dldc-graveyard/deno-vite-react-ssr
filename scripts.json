@@ -6,12 +6,12 @@
       "env": { "PORT": "3001", "MODE": "development" }
     },
     "cache": {
-      "cmd": "deno cache --unstable --config=deno.json --import-map=import_map.json ./src/server.ts ./src/generated/render.js",
+      "cmd": "deno cache --unstable --config=deno.json --import-map=import_map.json ./src/server.ts ./dist/server/Root.js",
       "watch": false
     }
   },
   "watcher": {
-    "match": ["src/*"],
-    "skip": ["*/.git/*", "src/pages/*", "src/generated/*"]
+    "match": ["src/**/*"],
+    "skip": ["*/.git/*", "src/pages/*", "src/generated/pages.ts"]
   }
 }

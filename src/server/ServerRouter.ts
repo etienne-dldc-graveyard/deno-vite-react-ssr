@@ -1,21 +1,39 @@
-import { Router } from "src/logic/Router.ts";
-import { createMemoryHistory, Location, MemoryHistory, To } from "history";
+import { ActiveRoute, Router } from "src/logic/Router.ts";
+import { createMemoryHistory, MemoryHistory, To, createPath } from "history";
 
 export class ServerRouter implements Router {
   private readonly history: MemoryHistory;
 
-  constructor(url: URL) {
+  public readonly route: ActiveRoute;
+
+  constructor(
+    url: URL,
+    Component: React.ComponentType,
+    props: Record<string, unknown>
+  ) {
     this.history = createMemoryHistory({
-      initialEntries: [url.pathname + url.search + url.hash],
+      initialEntries: [
+        createPath({
+          pathname: url.pathname,
+          search: url.search,
+          hash: url.hash,
+        }),
+      ],
     });
+    this.route = {
+      location: this.history.location,
+      Component,
+      props,
+    };
   }
 
-  get nextLocation(): Location | null {
-    return null;
+  getStringLocation(): string {
+    return this.history.createHref(this.history.location);
   }
 
-  get activeLocation(): Location {
-    return this.history.location;
+  subscribe() {
+    // noop
+    return () => {};
   }
 
   createHref(to: To): string {

@@ -12,7 +12,4 @@ export default defineConfig({
     ...pagesPlugin(),
     denoPlugin({ importMap }),
   ],
-  build: {
-    watch: { exclude: ["generated/**"] },
-  },
 });

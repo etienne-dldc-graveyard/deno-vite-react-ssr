@@ -19,7 +19,7 @@ function createConfig(
     logLevel: mode === "development" ? "silent" : "info",
     clearScreen: false,
     build: {
-      emptyOutDir: mode === "development" ? false : true,
+      watch: {},
     },
   };
   return {
@@ -48,7 +48,7 @@ export function buildServer(mode: "development" | "production") {
     createConfig(mode, {
       build: {
         outDir: projectPath("dist/server"),
-        ssr: "./render.tsx",
+        ssr: "./views/Root.tsx",
         rollupOptions: {
           output: {
             format: "esm",
@@ -59,32 +59,12 @@ export function buildServer(mode: "development" | "production") {
   );
 }
 
-export async function copyFiles(notify: boolean): Promise<void> {
-  console.log("=> Copy Files");
-  await fse.emptyDir(projectPath("src/generated/assets"));
-  await fse.copy(
-    projectPath("dist/client/assets"),
-    projectPath("src/generated/assets")
-  );
-  await fse.copy(
-    projectPath("dist/client/index.html"),
-    projectPath("src/generated/index.html")
-  );
-  await fse.copy(
-    projectPath("dist/server/render.js"),
-    projectPath("src/generated/render.js")
-  );
-  await fse.copy(
-    projectPath("dist/client/ssr-manifest.json"),
-    projectPath("src/generated/ssr-manifest.json")
-  );
-  if (notify) {
-    const fetch = (await import("node-fetch")).default;
-    try {
-      await fetch("http://localhost:3001/dev/invalidate");
-    } catch (error) {
-      console.warn(`=> Dev server offline ?`);
-    }
+export async function notifyChanges(): Promise<void> {
+  const fetch = (await import("node-fetch")).default;
+  try {
+    await fetch("http://localhost:3001/_entx/dev/invalidate");
+  } catch (error) {
+    console.warn(`=> Dev server offline ?`);
   }
 }
 

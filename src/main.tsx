@@ -1,12 +1,13 @@
 import "./style/index.css";
 import { ClientApp } from "src/client/ClientApp.tsx";
 import { notNil } from "src/logic/Utils.ts";
-import { render, pages } from "./render.tsx";
+import { Root, pages } from "src/views/Root.tsx";
+import React from "react";
 
 const app = new ClientApp({
   onServerSideProps: (location, props) => {},
   rootEl: notNil(document.getElementById("root")),
-  render,
+  Root: Root,
   pages,
 });
 

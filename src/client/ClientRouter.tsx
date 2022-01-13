@@ -1,15 +1,25 @@
 // deno-lint-ignore-file no-explicit-any
-import pages from "~pages";
-import { To, Location } from "history";
-import { Router } from "src/logic/Router.ts";
+import type { Pages } from "~pages";
+import type { PropsApiResult } from "src/server/PropsApi.ts";
+import { To, Location, Update } from "history";
+import { ActiveRoute, Router } from "src/logic/Router.ts";
 import { createBrowserHistory } from "history";
-import { pagesToRoutes } from "src/logic/Route.ts";
-import { getBridgeData } from "src/logic/Bridge.ts";
+import {
+  matchRoute,
+  pagesToRoutes,
+  Route,
+  RouteMatch,
+} from "src/logic/Route.ts";
+import { notNil } from "src/logic/Utils.ts";
+import { Chemin } from "chemin";
+import { Subscription } from "suub";
+import { restore } from "zenjson";
 
 export type OnServerSideProps = (location: Location, props: any) => void;
 
 export type ClientRouterOptions = {
   onServerSideProps?: OnServerSideProps;
+  pages: Pages;
 };
 
 /**
@@ -18,26 +28,112 @@ export type ClientRouterOptions = {
  */
 export class ClientRouter implements Router {
   private readonly history = createBrowserHistory();
-  private readonly bridge = getBridgeData();
   private readonly onServerSideProps: OnServerSideProps;
+  private readonly routes: Array<Route>;
+  private readonly notFoundRouteMatch: RouteMatch;
+  private readonly subscription = Subscription<ActiveRoute>();
 
-  public readonly routes = pagesToRoutes(pages);
-  private currentActiveLocation: Location;
+  private activeRoute: ActiveRoute | null = null;
 
-  constructor({ onServerSideProps }: ClientRouterOptions) {
-    this.currentActiveLocation = this.history.location;
+  constructor({ onServerSideProps, pages }: ClientRouterOptions) {
+    this.routes = pagesToRoutes(pages);
+    const notFoundRoute = notNil(
+      this.routes.find((route) => route.chemin.equal(Chemin.create("404")))
+    );
+    this.notFoundRouteMatch = {
+      route: notFoundRoute,
+      params: {},
+      isNotFound: true,
+    };
     this.onServerSideProps = onServerSideProps ?? (() => {});
+    this.history.listen(this.onLocationChange.bind(this));
   }
 
-  get nextLocation(): Location | null {
-    if (this.history.location === this.currentActiveLocation) {
-      return null;
+  private onLocationChange({ location }: Update) {
+    const nextRoute: RouteMatch =
+      matchRoute(this.routes, location.pathname) ?? this.notFoundRouteMatch;
+    this.resolveRouteMatch(nextRoute, location).then(({ props, Component }) => {
+      if (props.kind === "redirect") {
+        throw new Error("Redirect not implemented");
+      }
+      this.activeRoute = {
+        location,
+        Component,
+        props: props.props,
+      };
+      this.subscription.emit(this.activeRoute);
+    });
+  }
+
+  public readonly subscribe = this.subscription.subscribe;
+
+  get location(): Location {
+    return this.activeRoute?.location ?? this.history.location;
+  }
+
+  async initialize(
+    routeId: string,
+    serverLocation: string,
+    isNotFound: boolean,
+    params: Record<string, unknown>,
+    prefetchedProps: Record<string, unknown>
+  ): Promise<void> {
+    // make sure server location match browser location
+    if (serverLocation !== this.createHref(this.history.location)) {
+      throw new Error(`Server location does not match browser location`);
     }
-    return this.history.location;
+    const location = this.history.location;
+    const route = notNil(this.routes.find((r) => r.id === routeId));
+    const nextRoute: RouteMatch = { route, params, isNotFound };
+    const { props, Component } = await this.resolveRouteMatch(
+      nextRoute,
+      location,
+      prefetchedProps
+    );
+    this.onServerSideProps(location, props);
+    if (props.kind === "redirect") {
+      throw new Error("Unexpected redirect props result");
+    }
+    this.activeRoute = {
+      location,
+      Component,
+      props: props.props,
+    };
   }
 
-  get activeLocation(): Location {
-    return this.currentActiveLocation;
+  private async resolveRouteMatch(
+    nextRoute: RouteMatch,
+    location: Location,
+    prefetchedProps?: any
+  ): Promise<{ Component: React.ComponentType; props: PropsApiResult }> {
+    const [mod, props] = await Promise.all([
+      nextRoute.route.module(),
+      prefetchedProps
+        ? Promise.resolve<PropsApiResult>({
+            kind: "props",
+            props: prefetchedProps,
+            notFound: nextRoute.isNotFound,
+          })
+        : this.fetchProps(location),
+    ]);
+    return {
+      Component: mod.default,
+      props,
+    };
+  }
+
+  private async fetchProps(location: Location): Promise<PropsApiResult> {
+    const req = `/_entx/props${this.createHref(location)}`;
+    const res = await fetch(req);
+    const d = await res.json();
+    return restore(d) as PropsApiResult;
+  }
+
+  get route(): ActiveRoute {
+    if (!this.activeRoute) {
+      throw new Error("Route not initialized");
+    }
+    return this.activeRoute;
   }
 
   createHref(to: To): string {
@@ -45,22 +141,22 @@ export class ClientRouter implements Router {
   }
 
   push(to: To): void {
-    throw new Error("Method not implemented.");
+    return this.history.push(to);
   }
 
   replace(to: To): void {
-    throw new Error("Method not implemented.");
+    return this.history.replace(to);
   }
 
   go(delta: number): void {
-    throw new Error("Method not implemented.");
+    return this.history.go(delta);
   }
 
   back(): void {
-    throw new Error("Method not implemented.");
+    return this.history.back();
   }
 
   forward(): void {
-    throw new Error("Method not implemented.");
+    return this.history.forward();
   }
 }

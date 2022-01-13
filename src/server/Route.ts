@@ -178,7 +178,7 @@ function groupByPattern(routes: Array<Route>): Array<GroupResult> {
 }
 
 export function debugRoutes(routes: Routes) {
-  console.log(
+  console.info(
     routes.map(({ exact, pattern, isFallback, method }) => {
       return { pattern: pattern?.stringify(), exact, method, isFallback };
     })

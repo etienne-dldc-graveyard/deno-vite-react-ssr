@@ -8,9 +8,10 @@ import { Router } from "src/server/Router.ts";
 import { AllowedMethodsRoutes } from "src/server/AllowedMethodsRoutes.ts";
 import { Chemin } from "chemin";
 import { Static, STATIC_PATH } from "src/server/Static.ts";
-import { Render, RENDER_PATH } from "src/server/Render.ts";
-import { invalidateGeneratedData } from "src/server/GeneratedDataManager.ts";
+import { Render, RENDER_PATH } from "src/server/Render.tsx";
+import { invalidateBuildOutput } from "src/server/BuildOutputManager.ts";
 import { projectPath } from "src/server/Utils.ts";
+import { PropsApi } from "./server/PropsApi.ts";
 
 const app = new Application<State>({
   state: { router: null },
@@ -18,6 +19,10 @@ const app = new Application<State>({
 });
 
 const routes = AllowedMethodsRoutes([
+  ...Route.namespace("_entx", [
+    ...getDevRoutes(),
+    Route.GET(Chemin.create("props", RENDER_PATH), PropsApi()),
+  ]),
   ...Route.namespace(
     "api",
     Route.group(ErrorToJson(), [
@@ -27,10 +32,9 @@ const routes = AllowedMethodsRoutes([
       Route.fallback(NotFound),
     ])
   ),
-  ...getDevRoutes(),
   Route.GET(
     Chemin.create("assets", STATIC_PATH),
-    Static({ root: projectPath("src/generated/assets") })
+    Static({ root: projectPath("dist/client/assets") })
   ),
   Route.GET(RENDER_PATH, Render()),
 ]);
@@ -49,11 +53,11 @@ function getDevRoutes(): Routes {
   }
   return Route.namespace("dev", [
     Route.GET(
-      Chemin.create("generated", STATIC_PATH),
-      Static({ root: projectPath("src/generated") })
+      Chemin.create("dist", STATIC_PATH),
+      Static({ root: projectPath("dist") })
     ),
     Route.GET("invalidate", (ctx) => {
-      invalidateGeneratedData();
+      invalidateBuildOutput();
       ctx.response.body = { ok: true };
     }),
   ]);

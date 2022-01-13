@@ -6,35 +6,31 @@ import {
   projectPath,
   buildClient,
   buildServer,
-  copyFiles,
+  notifyChanges,
   createPagesFile,
 } from "./internal/tools";
 
 main().catch(console.error);
 async function main() {
-  console.log(`=> Cleanup`);
+  console.info(`=> Cleanup`);
   await fse.emptyDir(projectPath("dist"));
 
-  console.log(`=> Generate pages file`);
+  console.info(`=> Generate pages file`);
   await createPagesFile();
 
-  console.log("=> Building Client");
+  console.info("=> Building Client");
   const client = await buildClient("development");
 
-  console.log(`=> Building Server`);
+  console.info(`=> Building Server`);
   const server = await buildServer("development");
 
-  console.log(`=> Copying files`);
-  await copyFiles(false);
-
-  console.log(`=> Waiting for changes`);
-
-  const debouncedCopyFiles = debounce(500, copyFiles);
+  console.info(`=> Waiting for changes`);
+  const debouncedNotifyChanges = debounce(500, notifyChanges);
   const debouncedCreatePagesFile = debounce(500, createPagesFile);
 
   const onEvent = (event: RollupWatcherEvent) => {
     if (event.code === "BUNDLE_END") {
-      debouncedCopyFiles(true);
+      debouncedNotifyChanges();
     }
   };
 

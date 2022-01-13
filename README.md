@@ -1,6 +1,6 @@
 # React SSR running on Deno (powered by Vite)
 
-## ⚠️ Experimental: this is not a working project ⚠️
+## ⚠️ Experimental ⚠️
 
 ## What is this project
 
@@ -10,16 +10,22 @@ You can think of this as an alternative to [Next](https://nextjs.org/) that runs
 
 We use Vite to bundle the App twice:
 
-- For the browser as usual but we remove `getServerSideProps` exports
+- For the browser we remove `getServerSideProps` exports (and the dependencies used inside)
 - For `Deno` with the `--ssr` option
 
-We only use Yarn and `node_modules` to install vite and its plugins, everything else uses native ESM imports (like in Deno). This is acheived using a custom plugin in Vite that interact with Deno's cache.
+We only use Yarn and `node_modules` to install vite and its plugins, the app itself uses native ESM imports and `import_map.json` (like in Deno). This is acheived using a custom plugin in Vite that interact with Deno's cache.
 
 ## Project status
 
-This is a very early experiment but right now a very basic version `getServerSideProps` is working. The page is correctly rendered on the server then hydrated by the client.
+This is a very early experiment but right now a very basic version `getServerSideProps` is working. The page is correctly rendered on the server then hydrated by the client. Client side navigation also work (props are fetch from the server with `getServerSideProps`).
 
-The big missing piece right now is client side routing.
+The next steps are:
+
+- Handle Redirect both on the client and server side
+- Cancel previous props fetching when client side navigation occurs to prevent race condition
+- Handle Errors
+- Integrate [react-helmet-async](https://github.com/staylor/react-helmet-async)
+- Handle `revalidate` to cache
 
 ## How to run the project
 

@@ -12,25 +12,6 @@ const ALL_METHODS: Set<HTTPMethods> = new Set<HTTPMethods>([
   "DELETE",
 ]);
 
-// export class AllowedMethodsResponse extends TumauResponse {
-//   public originalResponse: TumauResponse;
-//   public allowedMethods: Set<HttpMethod>;
-
-//   constructor(originalResponse: TumauResponse, allowedMethods: Set<HttpMethod>) {
-//     const allowHeaderContent = Array.from(allowedMethods.values()).join(',');
-
-//     super(
-//       originalResponse.extends({
-//         headers: {
-//           [HttpHeaders.Allow]: allowHeaderContent,
-//         },
-//       })
-//     );
-//     this.originalResponse = originalResponse;
-//     this.allowedMethods = allowedMethods;
-//   }
-// }
-
 export function AllowedMethodsRoutes(routes: Routes): Routes {
   const result: Routes = [];
   const byPattern = Route.groupByPattern(routes);
