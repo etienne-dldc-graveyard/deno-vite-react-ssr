@@ -4,6 +4,9 @@ import fse from "fs-extra";
 import path from "path";
 import glob from "glob";
 import prettier from "prettier";
+import react from "@vitejs/plugin-react";
+import { denoPlugin } from "../plugins/deno";
+import { pagesPlugin } from "../plugins/pages";
 
 export function projectPath(...parts: Array<string>): string {
   return path.resolve(process.cwd(), ...parts);
@@ -13,14 +16,22 @@ function createConfig(
   mode: "development" | "production",
   config: InlineConfig
 ): InlineConfig {
+  const importMap = fse.readJsonSync(projectPath("import_map.json"));
+
   const baseConfig: InlineConfig = {
-    configFile: projectPath("vite.config.ts"),
+    root: "./src",
+    configFile: false,
     mode: mode,
     logLevel: mode === "development" ? "silent" : "info",
     clearScreen: false,
     build: {
       watch: {},
     },
+    plugins: [
+      react({ jsxRuntime: "classic" }),
+      ...pagesPlugin(),
+      denoPlugin({ importMap }),
+    ],
   };
   return {
     ...baseConfig,
@@ -29,6 +40,7 @@ function createConfig(
       ...baseConfig.build,
       ...config.build,
     },
+    plugins: [...(baseConfig.plugins ?? []), ...(config.plugins ?? [])],
   };
 }
 

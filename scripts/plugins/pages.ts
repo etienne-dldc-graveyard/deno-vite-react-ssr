@@ -1,6 +1,6 @@
 import { Plugin } from "vite";
 import path from "path";
-import glob from "glob";
+// @ts-ignore
 import removeExports from "vite-plugin-remove-exports";
 
 type MatchFunction = (

@@ -1,13 +1,13 @@
 import { Plugin } from "vite";
 import { resolve } from "deno-importmap";
 import { readFile } from "fs/promises";
+import * as DenoCache from "../deno-cache/mod";
 
 export type Options = {
   importMap: { imports: Record<string, string> };
 };
 
 export function denoPlugin({ importMap = { imports: {} } }: Options): Plugin {
-  let DenoCache: typeof import("deno-cache") | null = null;
   return {
     enforce: "pre",
     name: "vite-plugin-deno",
@@ -23,8 +23,7 @@ export function denoPlugin({ importMap = { imports: {} } }: Options): Plugin {
     },
     async load(id) {
       if (id.startsWith("http")) {
-        const cache = DenoCache || (DenoCache = await import("deno-cache"));
-        const file = await cache.cache(id, undefined, "deps");
+        const file = await DenoCache.cache(id, undefined, "deps");
         return await readFile(file.path, "utf8");
       }
       return null;
