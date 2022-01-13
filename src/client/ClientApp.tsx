@@ -1,8 +1,8 @@
 import React from "react";
 import { hydrate } from "react-dom";
 import { notNil } from "src/logic/Utils.ts";
-import pages from "~pages";
-import { pagesToRoutes } from "src/logic/Route.ts";
+import type { Pages } from "~pages";
+import { pagesToRoutes, Route } from "src/logic/Route.ts";
 import { restore } from "zenjson";
 import { ClientRouter, OnServerSideProps } from "./ClientRouter.tsx";
 import { getBridgeData, Render } from "src/logic/Bridge.ts";
@@ -11,19 +11,21 @@ export type ClientAppOptions = {
   rootEl: HTMLElement;
   onServerSideProps?: OnServerSideProps;
   render: Render;
+  pages: Pages;
 };
 
 export class ClientApp {
   private readonly router: ClientRouter;
   private readonly bridge = getBridgeData();
-  private readonly routes = pagesToRoutes(pages);
+  private readonly routes: Route[];
   private readonly rootEl: HTMLElement;
   private readonly render: Render;
 
-  constructor({ onServerSideProps, rootEl, render }: ClientAppOptions) {
+  constructor({ onServerSideProps, rootEl, render, pages }: ClientAppOptions) {
     this.router = new ClientRouter({ onServerSideProps });
     this.rootEl = rootEl;
     this.render = render;
+    this.routes = pagesToRoutes(pages);
   }
 
   async hydrate() {
