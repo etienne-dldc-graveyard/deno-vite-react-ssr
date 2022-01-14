@@ -1,7 +1,7 @@
 {
   "imports": {
     "src/": "./src/",
-    "entx": "./src/entx/mod.ts",
+    "entx": "https://deno.land/x/entx@v1.0.4/mod.ts",
     "react": "https://esm.sh/react@17.0.2",
     "react-dom": "https://esm.sh/react-dom@17.0.2",
     "react-dom/": "https://esm.sh/react-dom@17.0.2/",

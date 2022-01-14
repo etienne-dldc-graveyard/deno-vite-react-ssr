@@ -2,6 +2,20 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "entx dev",
+      "type": "process",
+      "command": "npx",
+      "args": ["entx", "dev"],
+      "problemMatcher": []
+    },
+    {
+      "label": "entx build",
+      "type": "process",
+      "command": "npx",
+      "args": ["entx", "build"],
+      "problemMatcher": []
+    },
+    {
       "label": "denon start",
       "type": "process",
       "command": "denon",
