@@ -13,7 +13,6 @@ import {
   Route,
   RouteMatch,
 } from "../shared/Route.ts";
-import { getBuildOutput, invalidateBuildOutput } from "./BuildOutputManager.ts";
 import { sanitize } from "zenjson";
 import { ServerRouter } from "./ServerRouter.ts";
 import { renderToString } from "react-dom/server";
@@ -22,17 +21,22 @@ import { Root } from "../shared/Root.tsx";
 import { resolve } from "std/path/mod.ts";
 import { notNil } from "../shared/Utils.ts";
 import { Chemin } from "chemin";
+import { SsrManifest } from "../shared/Route.ts";
+import { nanoid } from "nanoid";
 
 export type { Path };
+
+export type SsrModule = { pages: Pages };
+
+export type BuildOutput<Ssr extends SsrModule> = {
+  indexHtml: string;
+  ssr: Ssr;
+  ssrManifest: SsrManifest;
+};
 
 export type PropsApiResult =
   | { kind: "props"; props: Record<string, unknown>; notFound?: boolean }
   | { kind: "redirect"; redirect: Redirect };
-
-export type ServerAppOptions = {
-  mode: "development" | "production";
-  port: number;
-};
 
 export type PageResolved =
   | {
@@ -61,9 +65,16 @@ export type EntxRouteResult =
   | { kind: "file"; path: string }
   | { kind: "notFound" };
 
-export class ServerApp {
+export type ServerAppOptions = {
+  mode: "development" | "production";
+  port: number;
+};
+
+export class ServerApp<Ssr extends SsrModule> {
   private port: number;
   private mode: "development" | "production";
+  private buildOutput: BuildOutput<Ssr> | null = null;
+  private buildOutputVersion = nanoid(10);
 
   constructor({ mode, port }: ServerAppOptions) {
     this.port = port;
@@ -75,10 +86,7 @@ export class ServerApp {
     if (resolved.kind === "redirect") {
       return { kind: "redirect", redirect: resolved.redirect };
     }
-    const { indexHtml } = await getBuildOutput({
-      mode: this.mode,
-      port: this.port,
-    });
+    const { indexHtml } = await this.getBuildOutput();
     const router = new ServerRouter(path, resolved.Component, resolved.props);
     const content = this.renderToString(router);
     const assets = resolved.route.assets
@@ -127,11 +135,60 @@ export class ServerApp {
         return { kind: "file", path: resolve(Deno.cwd(), "dist" + filePath) };
       }
       if (path.pathname === "/dev/invalidate") {
-        invalidateBuildOutput();
+        this.invalidateBuildOutput();
         return { kind: "json", data: { ok: true } };
       }
     }
     return { kind: "notFound" };
+  }
+
+  public async getBuildOutput(): Promise<BuildOutput<Ssr>> {
+    return (
+      this.buildOutput ?? (this.buildOutput = await this.fetchBuildOutput())
+    );
+  }
+
+  private async fetchBuildOutput(): Promise<BuildOutput<Ssr>> {
+    const devUrlBase = `http://localhost:${this.port}/_entx/dev`;
+
+    const indexHtmlProm =
+      this.mode === "production"
+        ? Deno.readTextFile(resolve(Deno.cwd(), `dist/index.html`))
+        : fetch(
+            `${devUrlBase}/dist/index.html?v=${this.buildOutputVersion}`
+          ).then((r) => r.text());
+
+    const ssrModuleProm: Promise<Ssr> =
+      this.mode === "production"
+        ? import(`dist-ssr/ssr.js`)
+        : import(`${devUrlBase}/dist-ssr/ssr.js?v=${this.buildOutputVersion}`);
+
+    const ssrManifestProm: Promise<SsrManifest> =
+      this.mode === "production"
+        ? import(`dist/ssr-manifest.json`, { assert: { type: "json" } })
+        : import(
+            `${devUrlBase}/dist/ssr-manifest.json?v=${this.buildOutputVersion}`,
+            {
+              assert: { type: "json" },
+            }
+          ).then((r) => r.default);
+
+    const [indexHtml, ssrModule, ssrManifest] = await Promise.all([
+      indexHtmlProm,
+      ssrModuleProm,
+      ssrManifestProm,
+    ]);
+
+    return {
+      indexHtml,
+      ssr: ssrModule,
+      ssrManifest,
+    };
+  }
+
+  private invalidateBuildOutput() {
+    this.buildOutputVersion = nanoid(10);
+    this.buildOutput = null;
   }
 
   private renderToString(router: ServerRouter): string {
@@ -162,10 +219,7 @@ export class ServerApp {
   }
 
   private async resolvePage(path: Path): Promise<PageResolved> {
-    const build = await getBuildOutput({
-      mode: this.mode,
-      port: this.port,
-    });
+    const build = await this.getBuildOutput();
     const routes = pagesToRoutes(build.ssr.pages, build.ssrManifest);
     const notFoundRouteMatch: RouteMatch = {
       route: notNil(

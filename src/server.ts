@@ -25,7 +25,7 @@ function extractPath(ctx: Context): Path {
   return path;
 }
 
-const entxApp = new ServerApp({
+const entxApp = new ServerApp<typeof import("./ssr.ts")>({
   mode: Envs.MODE,
   port: Envs.PORT,
 });
