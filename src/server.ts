@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import "raf/polyfill";
 import { Application, Status } from "oak/mod.ts";
 import { Context, State } from "src/server/types.ts";
 import { Envs } from "src/server/Envs.ts";
@@ -10,11 +11,10 @@ import { AllowedMethodsRoutes } from "src/server/AllowedMethodsRoutes.ts";
 import { Chemin, CheminParam as P } from "chemin";
 import { Static, STATIC_PATH } from "src/server/Static.ts";
 import { projectPath } from "src/server/Utils.ts";
-import { ServerApp } from "entx";
+import { ServerApp } from "entx/server";
 import { Path } from "history";
 import { notNil } from "./logic/Utils.ts";
 import { relative } from "std/path/mod.ts";
-import "raf/polyfill";
 
 const PATH = Chemin.create(P.multiple(P.string("path")));
 

@@ -1,5 +1,5 @@
 import "./style/index.css";
-import { ClientApp } from "entx";
+import { ClientApp } from "entx/client";
 import { notNil } from "src/logic/Utils.ts";
 import pages from "./generated/pages.ts";
 
