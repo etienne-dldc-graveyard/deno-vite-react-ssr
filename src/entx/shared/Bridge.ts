@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { sanitize, restore } from "zenjson";
+import { restore, sanitize } from "zenjson";
 
 export type BridgeData = {
   props: Record<string, unknown>;
@@ -17,6 +17,6 @@ export function createBridgeData(data: BridgeData): string {
 
 export function getBridgeData(): BridgeData {
   return restore(
-    JSON.parse(document.getElementById(BRIDGE_DATA_ID)!.textContent ?? "{}")
+    JSON.parse(document.getElementById(BRIDGE_DATA_ID)!.textContent ?? "{}"),
   ) as any;
 }

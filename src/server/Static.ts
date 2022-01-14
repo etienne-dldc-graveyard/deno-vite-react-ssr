@@ -1,4 +1,4 @@
-import { Status, ContextSendOptions } from "oak/mod.ts";
+import { ContextSendOptions, Status } from "oak/mod.ts";
 import { Chemin, CheminParam as P } from "chemin";
 import { notNil } from "src/logic/Utils.ts";
 import { Middleware } from "src/server/types.ts";

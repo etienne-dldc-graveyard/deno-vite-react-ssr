@@ -1,4 +1,4 @@
-import { To, Location } from "history";
+import { Location, To } from "history";
 import { SubscribeMethod } from "suub";
 
 export type ActiveRoute = {

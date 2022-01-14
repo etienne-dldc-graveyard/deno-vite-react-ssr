@@ -2,8 +2,8 @@
   "name": "vite-deno",
   "version": "0.0.0",
   "scripts": {
-    "dev": "esr ./scripts/dev.ts",
-    "build": "esr ./scripts/build.ts"
+    "dev": "esr ./entx/dev.ts",
+    "build": "esr ./entx/build.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^1.0.7",
@@ -20,6 +20,7 @@
     "chokidar": "^3.5.2",
     "debounce": "^1.2.1",
     "deno-importmap": "^0.1.6",
+    "esbuild": "^0.14.11",
     "esbuild-runner": "^2.2.1",
     "fs-extra": "^10.0.0",
     "glob": "^7.2.0",

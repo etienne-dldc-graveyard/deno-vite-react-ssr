@@ -15,7 +15,7 @@ export type GetServerSidePropsContext<Params> = {
 };
 
 export type GetServerSideProps<Props = {}, Params = {}> = (
-  context: GetServerSidePropsContext<Params>
+  context: GetServerSidePropsContext<Params>,
 ) => Promise<GetServerSidePropsResult<Props>> | GetServerSidePropsResult<Props>;
 
 export type PageModule = {

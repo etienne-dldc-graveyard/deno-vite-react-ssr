@@ -1,5 +1,12 @@
-import { ActiveRoute, Router } from "src/logic/Router.ts";
-import { createMemoryHistory, MemoryHistory, To, createPath } from "history";
+import React from "react";
+import { ActiveRoute, Router } from "../shared/Router.ts";
+import {
+  createMemoryHistory,
+  createPath,
+  MemoryHistory,
+  Path,
+  To,
+} from "history";
 
 export class ServerRouter implements Router {
   private readonly history: MemoryHistory;
@@ -7,18 +14,12 @@ export class ServerRouter implements Router {
   public readonly route: ActiveRoute;
 
   constructor(
-    url: URL,
+    path: Path,
     Component: React.ComponentType,
-    props: Record<string, unknown>
+    props: Record<string, unknown>,
   ) {
     this.history = createMemoryHistory({
-      initialEntries: [
-        createPath({
-          pathname: url.pathname,
-          search: url.search,
-          hash: url.hash,
-        }),
-      ],
+      initialEntries: [createPath(path)],
     });
     this.route = {
       location: this.history.location,

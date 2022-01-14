@@ -13,10 +13,19 @@ export function denoPlugin({ importMap = { imports: {} } }: Options): Plugin {
     name: "vite-plugin-deno",
     resolveId(source, importer, { ssr }) {
       const resolvedId = resolve(source, importMap, importer);
-      if (resolvedId.startsWith("http")) {
-        if (ssr) {
+      if (ssr) {
+        if (resolvedId.startsWith("http")) {
           return { id: resolvedId, external: true };
         }
+
+        // Temp while entx is local
+        if (resolvedId === "./src/entx/mod.ts") {
+          return { id: "entx", external: true };
+        }
+        if (resolvedId.match(/entx/)) {
+          console.warn(`Internal entx import: ${resolvedId}`);
+        }
+
         return resolvedId;
       }
       return resolvedId;

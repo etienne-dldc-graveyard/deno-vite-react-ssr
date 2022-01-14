@@ -1,4 +1,4 @@
-import { HTTPMethods, composeMiddleware } from "oak/mod.ts";
+import { composeMiddleware, HTTPMethods } from "oak/mod.ts";
 import { Middleware } from "src/server/types.ts";
 import { Route, Routes } from "./Route.ts";
 
@@ -29,7 +29,7 @@ export function AllowedMethodsRoutes(routes: Routes): Routes {
           acc.add(route.method);
           return acc;
         },
-        new Set<HTTPMethods>(["OPTIONS"])
+        new Set<HTTPMethods>(["OPTIONS"]),
       );
       const methods = allowedMethods || ALL_METHODS;
       if (methods.size === 1) {
@@ -49,8 +49,8 @@ export function AllowedMethodsRoutes(routes: Routes): Routes {
         result.push(
           Route.create(
             { pattern, exact: true, method: "OPTIONS" },
-            AllowedMethodsMiddleware(methods)
-          )
+            AllowedMethodsMiddleware(methods),
+          ),
         );
       }
     }

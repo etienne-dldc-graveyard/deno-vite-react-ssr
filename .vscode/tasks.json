@@ -14,6 +14,13 @@
       "command": "denon",
       "args": ["cache"],
       "problemMatcher": ["$deno"]
+    },
+    {
+      "label": "denon pages:build",
+      "type": "process",
+      "command": "denon",
+      "args": ["pages:build"],
+      "problemMatcher": ["$deno"]
     }
   ]
 }

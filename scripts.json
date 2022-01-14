@@ -2,16 +2,24 @@
   "$schema": "https://deno.land/x/denon@2.4.9/schema.json",
   "scripts": {
     "start": {
-      "cmd": "deno run -A --unstable --no-check --config=deno.json --import-map=import_map.json ./src/server.ts",
+      "cmd": "deno run -A --unstable --no-check --config=deno.json --importmap=importmap.json ./src/server.ts",
       "env": { "PORT": "3001", "MODE": "development" }
     },
     "cache": {
-      "cmd": "deno cache --unstable --config=deno.json --import-map=import_map.json ./src/server.ts ./dist/server/Root.js",
+      "cmd": "deno cache --unstable --config=deno.json --importmap=importmap.json ./src/server.ts ./dist/server/pages.js",
+      "watch": false
+    },
+    "pages:build": {
+      "cmd": "deno run -A --unstable --config=deno.json --importmap=importmap.json ./scripts/pages.ts",
+      "watch": false
+    },
+    "format": {
+      "cmd": "deno fmt src",
       "watch": false
     }
   },
   "watcher": {
     "match": ["src/**/*"],
-    "skip": ["*/.git/*", "src/pages/*", "src/generated/pages.ts"]
+    "skip": ["*/.git/*", "src/pages/*", "src/pages.ts"]
   }
 }

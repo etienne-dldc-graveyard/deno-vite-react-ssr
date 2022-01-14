@@ -43,24 +43,23 @@ function namespace(pattern: Chemin | string, routes: Routes): Routes {
   return routes.map(
     (route): Route => ({
       ...route,
-      pattern:
-        route.pattern === null
-          ? Chemin.create(pattern)
-          : Chemin.create(pattern, route.pattern),
-    })
+      pattern: route.pattern === null
+        ? Chemin.create(pattern)
+        : Chemin.create(pattern, route.pattern),
+    }),
   );
 }
 
 function group(
   middlewares: Middleware | Array<Middleware>,
-  routes: Routes
+  routes: Routes,
 ): Routes {
   const middleware = resolveMiddleware(middlewares);
   return routes.map(
     (route): Route => ({
       ...route,
       middleware: composeMiddleware([middleware, route.middleware]),
-    })
+    }),
   );
 }
 
@@ -85,10 +84,11 @@ function createRoute(
     method?: HTTPMethods | null;
     exact?: boolean;
   },
-  middleware: Middleware | Array<Middleware>
+  middleware: Middleware | Array<Middleware>,
 ): Route {
-  const patternResolved =
-    typeof pattern === "string" ? Chemin.parse(pattern) : pattern;
+  const patternResolved = typeof pattern === "string"
+    ? Chemin.parse(pattern)
+    : pattern;
   return {
     [ROUTE_TOKEN]: true,
     pattern: patternResolved,
@@ -100,7 +100,7 @@ function createRoute(
 }
 
 function resolveMiddleware(
-  middleware: Middleware | Array<Middleware>
+  middleware: Middleware | Array<Middleware>,
 ): Middleware {
   if (Array.isArray(middleware)) {
     return composeMiddleware(middleware);
@@ -118,7 +118,7 @@ export interface FindResult {
 function find(
   routes: Array<Route>,
   pathname: string,
-  method: HTTPMethods | null
+  method: HTTPMethods | null,
 ): Array<FindResult> {
   const parts = splitPathname(pathname);
   return routes
@@ -137,8 +137,8 @@ function find(
       if (route.exact && pathMatch.rest.length > 0) {
         return false;
       }
-      const methodIsMatching =
-        method === null || route.method === null || route.method === method;
+      const methodIsMatching = method === null || route.method === null ||
+        route.method === method;
       if (methodIsMatching === false) {
         return false;
       }
@@ -162,12 +162,11 @@ function groupByPattern(routes: Array<Route>): Array<GroupResult> {
   const result: Array<GroupResult> = [];
   routes.forEach((route) => {
     const pattern = route.pattern;
-    const exist =
-      pattern === null
-        ? result.find((item) => item.pattern === null)
-        : result.find(
-            (item) => item.pattern !== null && item.pattern.equal(pattern)
-          );
+    const exist = pattern === null
+      ? result.find((item) => item.pattern === null)
+      : result.find(
+        (item) => item.pattern !== null && item.pattern.equal(pattern),
+      );
     if (exist) {
       exist.routes.push(route);
     } else {
@@ -181,6 +180,6 @@ export function debugRoutes(routes: Routes) {
   console.info(
     routes.map(({ exact, pattern, isFallback, method }) => {
       return { pattern: pattern?.stringify(), exact, method, isFallback };
-    })
+    }),
   );
 }

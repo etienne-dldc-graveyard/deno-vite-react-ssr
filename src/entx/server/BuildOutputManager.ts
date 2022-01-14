@@ -1,14 +1,16 @@
-import { pagesToRoutes, Route, SsrManifest } from "src/logic/Route.ts";
 import { resolve } from "std/path/mod.ts";
-import { notNil } from "src/logic/Utils.ts";
+import { pagesToRoutes, Route, SsrManifest } from "../shared/Route.ts";
+import { notNil } from "../shared/Utils.ts";
 import { Chemin } from "chemin";
 import { nanoid } from "nanoid";
-import { Envs } from "src/server/Envs.ts";
-import { Router } from "src/logic/Router.ts";
+
+export type BuildOutputConfig = {
+  mode: "development" | "production";
+  port: number;
+};
 
 export type BuildOutput = {
   indexHtml: string;
-  Root: React.ComponentType<{ router: Router }>;
   routes: Route[];
   notFoundRoute: Route;
 };
@@ -21,27 +23,32 @@ export function invalidateBuildOutput() {
   buildOutput = null;
 }
 
-export async function getBuildOutput(): Promise<BuildOutput> {
-  return buildOutput ?? (buildOutput = await fetchBuildOutput(version));
+export async function getBuildOutput(
+  config: BuildOutputConfig
+): Promise<BuildOutput> {
+  return buildOutput ?? (buildOutput = await fetchBuildOutput(config, version));
 }
 
-async function fetchBuildOutput(version: string): Promise<BuildOutput> {
-  const devUrlBase = `http://localhost:${Envs.PORT}/_entx/dev/dist`;
+async function fetchBuildOutput(
+  config: BuildOutputConfig,
+  version: string
+): Promise<BuildOutput> {
+  const devUrlBase = `http://localhost:${config.port}/_entx/dev/dist`;
 
   const indexHtmlProm =
-    Envs.MODE === "production"
+    config.mode === "production"
       ? Deno.readTextFile(resolve(Deno.cwd(), `dist/client/index.html`))
       : fetch(`${devUrlBase}/client/index.html?v=${version}`).then((r) =>
           r.text()
         );
 
-  const rootModuleProm: Promise<typeof import("src/views/Root.tsx")> =
-    Envs.MODE === "production"
-      ? import(`dist/server/Root.js`)
-      : import(`${devUrlBase}/server/Root.js?v=${version}`);
+  const pagesModuleProm: Promise<typeof import("src/pages.ts")> =
+    config.mode === "production"
+      ? import(`dist/server/pages.js`)
+      : import(`${devUrlBase}/server/pages.js?v=${version}`);
 
   const ssrManifestProm: Promise<SsrManifest> =
-    Envs.MODE === "production"
+    config.mode === "production"
       ? import(`dist/client/ssr-manifest.json`, { assert: { type: "json" } })
       : import(`${devUrlBase}/client/ssr-manifest.json?v=${version}`, {
           assert: { type: "json" },
@@ -49,11 +56,11 @@ async function fetchBuildOutput(version: string): Promise<BuildOutput> {
 
   const [indexHtml, rootModule, ssrManifest] = await Promise.all([
     indexHtmlProm,
-    rootModuleProm,
+    pagesModuleProm,
     ssrManifestProm,
   ]);
 
-  const routes = pagesToRoutes(rootModule.pages, ssrManifest);
+  const routes = pagesToRoutes(rootModule.default, ssrManifest);
 
   const notFoundRoute = notNil(
     routes.find((route) => route.chemin.equal(Chemin.create("404")))
@@ -61,7 +68,6 @@ async function fetchBuildOutput(version: string): Promise<BuildOutput> {
 
   return {
     indexHtml,
-    Root: rootModule.Root,
     routes,
     notFoundRoute,
   };

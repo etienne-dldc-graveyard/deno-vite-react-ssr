@@ -1,15 +1,7 @@
-/**
- * This file is the entry point of the Vite SSR build
- */
 import React, { useState } from "react";
-import { Router } from "src/logic/Router.ts";
-import { RouterContext } from "src/hooks/useRouter.ts";
-import { useIsomorphicLayoutEffect } from "src/hooks/useIsomorphicLayoutEffect.ts";
-import { ActiveRoute } from "src/logic/Router.ts";
-import pages from "~pages";
-
-// export to make them available on the ssr build
-export { pages };
+import { RouterContext } from "./hooks/useRouter.ts";
+import { useIsomorphicLayoutEffect } from "./hooks/useIsomorphicLayoutEffect.ts";
+import { ActiveRoute, Router } from "./Router.ts";
 
 type Props = {
   router: Router;

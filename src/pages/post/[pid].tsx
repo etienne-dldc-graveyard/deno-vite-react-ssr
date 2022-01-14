@@ -1,5 +1,5 @@
 import React from "react";
-import { GetServerSideProps } from "~pages";
+import { GetServerSideProps } from "entx";
 
 type Params = {
   pid: string;

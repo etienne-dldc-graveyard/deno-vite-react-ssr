@@ -1,7 +1,8 @@
 {
-  "deno.enable": false,
-  "deno.lint": false,
-  "deno.unstable": false,
-  "deno.importMap": "./import_map.json",
+  "vr.enable": true,
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "deno.importMap": "./importmap.json",
   "deno.config": "./deno.json"
 }

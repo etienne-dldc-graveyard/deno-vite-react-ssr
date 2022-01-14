@@ -16,7 +16,7 @@ export type CreateLinkPropsOptions = {
 
 export type CreateLinkProps = (
   to: To,
-  options?: CreateLinkPropsOptions
+  options?: CreateLinkPropsOptions,
 ) => CreateLinkPropsResult;
 
 type LinkEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent>;
@@ -51,7 +51,7 @@ export function useCreateLinkProps(): CreateLinkProps {
 }
 
 function isModifiedEvent(
-  event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
 ): boolean {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }

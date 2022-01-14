@@ -1,28 +1,63 @@
-import { Application } from "oak/mod.ts";
-import { State } from "src/server/types.ts";
+// deno-lint-ignore-file no-explicit-any
+import { Application, Status } from "oak/mod.ts";
+import { Context, State } from "src/server/types.ts";
 import { Envs } from "src/server/Envs.ts";
 import { ErrorToJson } from "src/server/ErrorToJson.ts";
 import { NotFound } from "src/server/NotFound.ts";
-import { Route, Routes } from "src/server/Route.ts";
+import { Route } from "src/server/Route.ts";
 import { Router } from "src/server/Router.ts";
 import { AllowedMethodsRoutes } from "src/server/AllowedMethodsRoutes.ts";
-import { Chemin } from "chemin";
+import { Chemin, CheminParam as P } from "chemin";
 import { Static, STATIC_PATH } from "src/server/Static.ts";
-import { Render, RENDER_PATH } from "src/server/Render.tsx";
-import { invalidateBuildOutput } from "src/server/BuildOutputManager.ts";
 import { projectPath } from "src/server/Utils.ts";
-import { PropsApi } from "./server/PropsApi.ts";
+import { Path, ServerApp } from "./entx/server/ServerApp.tsx";
+import { notNil } from "./logic/Utils.ts";
+import { relative } from "std/path/mod.ts";
+import "raf/polyfill";
 
-const app = new Application<State>({
+const PATH = Chemin.create(P.multiple(P.string("path")));
+
+function extractPath(ctx: Context): Path {
+  const routeParams = notNil(ctx.state.router).getOrFail(PATH);
+  const { search, hash } = ctx.request.url;
+  const pathname = "/" + routeParams.path.join("/");
+  const path: Path = { pathname, search, hash };
+  return path;
+}
+
+const entxApp = new ServerApp({
+  mode: Envs.MODE,
+  port: Envs.PORT,
+});
+
+const oakApp = new Application<State>({
   state: { router: null },
   contextState: "prototype",
 });
 
 const routes = AllowedMethodsRoutes([
-  ...Route.namespace("_entx", [
-    ...getDevRoutes(),
-    Route.GET(Chemin.create("props", RENDER_PATH), PropsApi()),
-  ]),
+  Route.GET(
+    Chemin.create("_entx", PATH),
+    async (ctx, next) => {
+      const res = await entxApp.entxRoute(extractPath(ctx));
+      if (res.kind === "json") {
+        ctx.response.body = res.data as any;
+        return;
+      }
+      if (res.kind === "file") {
+        await ctx.send({
+          root: Deno.cwd(),
+          path: "/" + relative(Deno.cwd(), res.path),
+        });
+        return;
+      }
+      if (res.kind === "notFound") {
+        return next();
+      }
+      throw new Error("Unexpected response kind");
+    },
+    NotFound
+  ),
   ...Route.namespace(
     "api",
     Route.group(ErrorToJson(), [
@@ -36,29 +71,24 @@ const routes = AllowedMethodsRoutes([
     Chemin.create("assets", STATIC_PATH),
     Static({ root: projectPath("dist/client/assets") })
   ),
-  Route.GET(RENDER_PATH, Render()),
+  Route.GET(PATH, async (ctx) => {
+    const res = await entxApp.render(extractPath(ctx));
+    if (res.kind === "redirect") {
+      ctx.response.redirect(res.redirect.destination);
+      return;
+    }
+    if (res.isNotFound) {
+      ctx.response.status = Status.NotFound;
+    }
+    ctx.response.body = res.htmlContent;
+    return;
+  }),
 ]);
 
-app.use(Router(routes));
+oakApp.use(Router(routes));
 
-app.addEventListener("listen", () => {
+oakApp.addEventListener("listen", () => {
   console.info(`Server is listening on http://localhost:${Envs.PORT}`);
 });
 
-await app.listen({ port: Envs.PORT });
-
-function getDevRoutes(): Routes {
-  if (Envs.MODE === "production") {
-    return [];
-  }
-  return Route.namespace("dev", [
-    Route.GET(
-      Chemin.create("dist", STATIC_PATH),
-      Static({ root: projectPath("dist") })
-    ),
-    Route.GET("invalidate", (ctx) => {
-      invalidateBuildOutput();
-      ctx.response.body = { ok: true };
-    }),
-  ]);
-}
+await oakApp.listen({ port: Envs.PORT });

@@ -1,20 +1,19 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Pages } from "~pages";
-import type { PropsApiResult } from "src/server/PropsApi.ts";
-import { To, Location, Update } from "history";
-import { ActiveRoute, Router } from "src/logic/Router.ts";
-import { createBrowserHistory } from "history";
+import type { Pages } from "../shared/Pages.ts";
+import type { PropsApiResult } from "../server/ServerApp.tsx";
+import { createBrowserHistory, Location, To, Update } from "history";
+import { Chemin } from "chemin";
+import { SubscribeMethod, Subscription } from "suub";
+import { restore } from "zenjson";
+import { nanoid } from "nanoid";
 import {
   matchRoute,
   pagesToRoutes,
   Route,
   RouteMatch,
-} from "src/logic/Route.ts";
-import { notNil } from "src/logic/Utils.ts";
-import { Chemin } from "chemin";
-import { Subscription } from "suub";
-import { restore } from "zenjson";
-import { nanoid } from "nanoid";
+} from "../shared/Route.ts";
+import { ActiveRoute, Router } from "../shared/Router.ts";
+import { notNil } from "../shared/Utils.ts";
 
 export type OnServerSideProps = (location: Location, props: any) => void;
 
@@ -40,7 +39,7 @@ export class ClientRouter implements Router {
   constructor({ onServerSideProps, pages }: ClientRouterOptions) {
     this.routes = pagesToRoutes(pages);
     const notFoundRoute = notNil(
-      this.routes.find((route) => route.chemin.equal(Chemin.create("404")))
+      this.routes.find((route) => route.chemin.equal(Chemin.create("404"))),
     );
     this.notFoundRouteMatch = {
       route: notFoundRoute,
@@ -52,8 +51,8 @@ export class ClientRouter implements Router {
   }
 
   private onLocationChange({ location }: Update) {
-    const nextRoute: RouteMatch =
-      matchRoute(this.routes, location.pathname) ?? this.notFoundRouteMatch;
+    const nextRoute: RouteMatch = matchRoute(this.routes, location.pathname) ??
+      this.notFoundRouteMatch;
     const requestId = nanoid(12);
     this.requestId = requestId;
     this.resolveRouteMatch(nextRoute, location).then(({ props, Component }) => {
@@ -85,7 +84,7 @@ export class ClientRouter implements Router {
     serverLocation: string,
     isNotFound: boolean,
     params: Record<string, unknown>,
-    prefetchedProps: Record<string, unknown>
+    prefetchedProps: Record<string, unknown>,
   ): Promise<void> {
     // make sure server location match browser location
     if (serverLocation !== this.createHref(this.history.location)) {
@@ -97,7 +96,7 @@ export class ClientRouter implements Router {
     const { props, Component } = await this.resolveRouteMatch(
       nextRoute,
       location,
-      prefetchedProps
+      prefetchedProps,
     );
     this.onServerSideProps(location, props);
     if (props.kind === "redirect") {
@@ -113,16 +112,16 @@ export class ClientRouter implements Router {
   private async resolveRouteMatch(
     nextRoute: RouteMatch,
     location: Location,
-    prefetchedProps?: any
+    prefetchedProps?: any,
   ): Promise<{ Component: React.ComponentType; props: PropsApiResult }> {
     const [mod, props] = await Promise.all([
       nextRoute.route.module(),
       prefetchedProps
         ? Promise.resolve<PropsApiResult>({
-            kind: "props",
-            props: prefetchedProps,
-            notFound: nextRoute.isNotFound,
-          })
+          kind: "props",
+          props: prefetchedProps,
+          notFound: nextRoute.isNotFound,
+        })
         : this.fetchProps(location),
     ]);
     return {

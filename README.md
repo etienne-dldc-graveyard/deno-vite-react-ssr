@@ -13,7 +13,7 @@ We use Vite to bundle the App twice:
 - For the browser we remove `getServerSideProps` exports (and the dependencies used inside)
 - For `Deno` with the `--ssr` option
 
-We only use Yarn and `node_modules` to install vite and its plugins, the app itself uses native ESM imports and `import_map.json` (like in Deno). This is acheived using a custom plugin in Vite that interact with Deno's cache.
+We only use Yarn and `node_modules` to install vite and its plugins, the app itself uses native ESM imports and `importmap.json` (like in Deno). This is acheived using a custom plugin in Vite that interact with Deno's cache.
 
 ## Project status
 

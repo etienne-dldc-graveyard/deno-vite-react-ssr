@@ -16,7 +16,7 @@ function createConfig(
   mode: "development" | "production",
   config: InlineConfig
 ): InlineConfig {
-  const importMap = fse.readJsonSync(projectPath("import_map.json"));
+  const importMap = fse.readJsonSync(projectPath("importmap.json"));
 
   const baseConfig: InlineConfig = {
     root: "./src",
@@ -60,7 +60,7 @@ export function buildServer(mode: "development" | "production") {
     createConfig(mode, {
       build: {
         outDir: projectPath("dist/server"),
-        ssr: "./views/Root.tsx",
+        ssr: "./pages.ts",
         rollupOptions: {
           output: {
             format: "esm",
@@ -98,34 +98,4 @@ async function createBuild(config: InlineConfig): Promise<RollupWatcher> {
     };
     watcher.on("event", onEvent);
   });
-}
-
-export async function createPagesFile(): Promise<void> {
-  const pagesFile = projectPath("src/generated/pages.ts");
-  const files = glob.sync("**/*", {
-    cwd: projectPath("src/pages"),
-    nodir: true,
-  });
-  const EXTENSION_REG = /\.tsx?$/;
-  const pages = files.filter((file) => EXTENSION_REG.test(file));
-
-  const items = pages.map((page) => {
-    const importPath = path.relative(
-      path.dirname(pagesFile),
-      projectPath("src/pages", page)
-    );
-    return `{ path: "${page}", module: () => import("${importPath}") }`;
-  });
-
-  const content = [
-    `import { Pages } from '../logic/pages.ts';`,
-    ``,
-    `export * from '../logic/pages.ts';`,
-    ``,
-    `const pages: Pages = [${items.join(",")}];`,
-    ``,
-    `export default pages;`,
-  ].join("\n");
-  const contentFormatted = prettier.format(content, { filepath: pagesFile });
-  await fse.writeFile(pagesFile, contentFormatted);
 }

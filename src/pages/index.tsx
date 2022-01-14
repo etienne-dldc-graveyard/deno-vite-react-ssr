@@ -1,6 +1,5 @@
 import React from "react";
-import { GetServerSideProps } from "~pages";
-import { useCreateLinkProps } from "src/hooks/useCreateLinkProps.ts";
+import { GetServerSideProps, useCreateLinkProps } from "entx";
 
 type Props = {
   now: Date;
