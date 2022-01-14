@@ -142,7 +142,11 @@ export class ServerApp<Ssr extends SsrModule> {
     return { kind: "notFound" };
   }
 
-  public async getBuildOutput(): Promise<BuildOutput<Ssr>> {
+  public async getSsr(): Promise<Ssr> {
+    return (await this.getBuildOutput()).ssr;
+  }
+
+  private async getBuildOutput(): Promise<BuildOutput<Ssr>> {
     return (
       this.buildOutput ?? (this.buildOutput = await this.fetchBuildOutput())
     );
