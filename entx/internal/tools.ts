@@ -57,7 +57,7 @@ export function buildClient(mode: "development" | "production") {
   return createBuild(
     createConfig(mode, {
       build: {
-        outDir: projectPath("dist"),
+        outDir: projectPath(".entx/client"),
         ssrManifest: true,
       },
     })
@@ -68,7 +68,7 @@ export function buildServer(mode: "development" | "production") {
   return createBuild(
     createConfig(mode, {
       build: {
-        outDir: projectPath("dist-ssr"),
+        outDir: projectPath(".entx/server"),
         ssr: "src/ssr.ts",
         rollupOptions: {
           output: {

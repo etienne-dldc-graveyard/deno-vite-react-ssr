@@ -4,7 +4,7 @@ import { projectPath, buildClient, buildServer } from "./internal/tools";
 main().catch(console.error);
 async function main() {
   console.info(`=> Cleanup`);
-  await fse.emptyDir(projectPath("dist"));
+  await fse.emptyDir(projectPath(".entx"));
 
   console.info("=> Building Client");
   const client = await buildClient("production");

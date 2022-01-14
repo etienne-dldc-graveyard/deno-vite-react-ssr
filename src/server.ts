@@ -48,6 +48,7 @@ const routes = AllowedMethodsRoutes([
         await ctx.send({
           root: Deno.cwd(),
           path: "/" + relative(Deno.cwd(), res.path),
+          hidden: true,
         });
         return;
       }
@@ -69,7 +70,7 @@ const routes = AllowedMethodsRoutes([
   ),
   Route.GET(
     Chemin.create("assets", STATIC_PATH),
-    Static({ root: projectPath("dist/assets") })
+    Static({ root: projectPath(".entx/client/assets") })
   ),
   Route.GET(PATH, async (ctx) => {
     const res = await entxApp.render(extractPath(ctx));

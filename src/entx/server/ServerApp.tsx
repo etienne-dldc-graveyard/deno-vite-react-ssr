@@ -123,16 +123,9 @@ export class ServerApp<Ssr extends SsrModule> {
       return { kind: "json", data: body };
     }
     if (this.mode === "development") {
-      if (path.pathname.startsWith("/dev/dist-ssr/")) {
-        const filePath = path.pathname.slice("/dev/dist-ssr".length);
-        return {
-          kind: "file",
-          path: resolve(Deno.cwd(), "dist-ssr" + filePath),
-        };
-      }
-      if (path.pathname.startsWith("/dev/dist/")) {
-        const filePath = path.pathname.slice("/dev/dist".length);
-        return { kind: "file", path: resolve(Deno.cwd(), "dist" + filePath) };
+      if (path.pathname.startsWith("/dev/.entx/")) {
+        const filePath = path.pathname.slice("/dev/.entx".length);
+        return { kind: "file", path: resolve(Deno.cwd(), ".entx" + filePath) };
       }
       if (path.pathname === "/dev/invalidate") {
         this.invalidateBuildOutput();
@@ -157,21 +150,23 @@ export class ServerApp<Ssr extends SsrModule> {
 
     const indexHtmlProm =
       this.mode === "production"
-        ? Deno.readTextFile(resolve(Deno.cwd(), `dist/index.html`))
+        ? Deno.readTextFile(resolve(Deno.cwd(), `.entx/client/index.html`))
         : fetch(
-            `${devUrlBase}/dist/index.html?v=${this.buildOutputVersion}`
+            `${devUrlBase}/.entx/client/index.html?v=${this.buildOutputVersion}`
           ).then((r) => r.text());
 
     const ssrModuleProm: Promise<Ssr> =
       this.mode === "production"
-        ? import(`dist-ssr/ssr.js`)
-        : import(`${devUrlBase}/dist-ssr/ssr.js?v=${this.buildOutputVersion}`);
+        ? import(`.entx/server/ssr.js`)
+        : import(
+            `${devUrlBase}/.entx/server/ssr.js?v=${this.buildOutputVersion}`
+          );
 
     const ssrManifestProm: Promise<SsrManifest> =
       this.mode === "production"
-        ? import(`dist/ssr-manifest.json`, { assert: { type: "json" } })
+        ? import(`.entx/client/ssr-manifest.json`, { assert: { type: "json" } })
         : import(
-            `${devUrlBase}/dist/ssr-manifest.json?v=${this.buildOutputVersion}`,
+            `${devUrlBase}/.entx/client/ssr-manifest.json?v=${this.buildOutputVersion}`,
             {
               assert: { type: "json" },
             }
