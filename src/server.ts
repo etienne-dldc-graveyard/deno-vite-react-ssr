@@ -69,7 +69,7 @@ const routes = AllowedMethodsRoutes([
   ),
   Route.GET(
     Chemin.create("assets", STATIC_PATH),
-    Static({ root: projectPath("dist/client/assets") })
+    Static({ root: projectPath("dist/assets") })
   ),
   Route.GET(PATH, async (ctx) => {
     const res = await entxApp.render(extractPath(ctx));

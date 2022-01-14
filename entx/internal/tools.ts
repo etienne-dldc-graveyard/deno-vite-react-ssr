@@ -5,8 +5,8 @@ import path from "path";
 import glob from "glob";
 import prettier from "prettier";
 import react from "@vitejs/plugin-react";
-import { denoPlugin } from "../plugins/deno";
-import { pagesPlugin } from "../plugins/pages";
+import { denoPlugin } from "./denoPlugin";
+import { removeExportsPlugin } from "./removeExportsPlugin";
 
 export function projectPath(...parts: Array<string>): string {
   return path.resolve(process.cwd(), ...parts);
@@ -17,9 +17,9 @@ function createConfig(
   config: InlineConfig
 ): InlineConfig {
   const importMap = fse.readJsonSync(projectPath("importmap.json"));
+  const pagesDir = projectPath("src/pages");
 
   const baseConfig: InlineConfig = {
-    root: "./src",
     configFile: false,
     mode: mode,
     logLevel: mode === "development" ? "silent" : "info",
@@ -29,7 +29,16 @@ function createConfig(
     },
     plugins: [
       react({ jsxRuntime: "classic" }),
-      ...pagesPlugin(),
+      removeExportsPlugin({
+        match: (filepath, options) => {
+          if (options && options.ssr) {
+            return;
+          }
+          if (filepath.startsWith(pagesDir)) {
+            return ["getServerSideProps"];
+          }
+        },
+      }),
       denoPlugin({ importMap }),
     ],
   };
@@ -48,7 +57,7 @@ export function buildClient(mode: "development" | "production") {
   return createBuild(
     createConfig(mode, {
       build: {
-        outDir: projectPath("dist/client"),
+        outDir: projectPath("dist"),
         ssrManifest: true,
       },
     })
@@ -59,8 +68,8 @@ export function buildServer(mode: "development" | "production") {
   return createBuild(
     createConfig(mode, {
       build: {
-        outDir: projectPath("dist/server"),
-        ssr: "./pages.ts",
+        outDir: projectPath("dist-ssr"),
+        ssr: "src/ssr.ts",
         rollupOptions: {
           output: {
             format: "esm",
@@ -74,6 +83,7 @@ export function buildServer(mode: "development" | "production") {
 export async function notifyChanges(): Promise<void> {
   const fetch = (await import("node-fetch")).default;
   try {
+    console.info(`=> Notify Changes`);
     await fetch("http://localhost:3001/_entx/dev/invalidate");
   } catch (error) {
     console.warn(`=> Dev server offline ?`);

@@ -13,7 +13,7 @@ export type SsrManifest = Record<string, Array<string>>;
 
 export function pagesToRoutes(
   pages: Array<Page>,
-  ssrManifest?: SsrManifest,
+  ssrManifest?: SsrManifest
 ): Array<Route> {
   const EXTENSION_REGEX = /\.(js|ts|tsx|jsx)$/;
   const BASIC_ROUTE_REGEX = /^([\w-]+)$/;
@@ -36,7 +36,7 @@ export function pagesToRoutes(
             if (optionalCatchAll) {
               const name = optionalCatchAll[1];
               return CheminParam.optional(
-                CheminParam.multiple(CheminParam.string(name), false),
+                CheminParam.multiple(CheminParam.string(name), false)
               );
             }
             const catchAll = part.match(CATCH_ALL_ROUTE_REGEX);
@@ -53,7 +53,7 @@ export function pagesToRoutes(
               return CheminParam.constant(basic[1]);
             }
             throw new Error(`Invalid route part: ${page.path}`);
-          }),
+          })
         );
         const assets = ssrManifest ? (ssrManifest as any)[page.path] ?? [] : [];
         return {
@@ -76,7 +76,7 @@ export type RouteMatch = {
 
 export function matchRoute(
   routes: Array<Route>,
-  pathname: string,
+  pathname: string
 ): RouteMatch | null {
   for (const route of routes) {
     const match = route.chemin.matchExact(pathname);

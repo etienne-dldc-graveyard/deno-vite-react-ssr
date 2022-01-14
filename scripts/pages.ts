@@ -1,7 +1,7 @@
 import { resolve, relative, dirname } from "std/path/mod.ts";
 import { expandGlobSync } from "std/fs/mod.ts";
 
-const pagesFile = projectPath("src/pages.ts");
+const pagesFile = projectPath("src/generated/pages.ts");
 const files = Array.from(
   expandGlobSync("**/*", { includeDirs: false, root: projectPath("src/pages") })
 );
@@ -14,7 +14,7 @@ const items = pages.map((page) => {
     projectPath("src/pages", page.path)
   );
   const filePath = relative(projectPath("src/pages"), page.path);
-  return `{ path: "${filePath}", module: () => import("./${importPath}") }`;
+  return `{ path: "${filePath}", module: () => import("${importPath}") }`;
 });
 
 const content = [

@@ -1,7 +1,7 @@
 import "./style/index.css";
 import { ClientApp } from "entx";
 import { notNil } from "src/logic/Utils.ts";
-import pages from "./pages.ts";
+import pages from "./generated/pages.ts";
 
 const app = new ClientApp({
   onServerSideProps: (location, props) => {},

@@ -1,7 +1,5 @@
 import { resolve } from "std/path/mod.ts";
-import { pagesToRoutes, Route, SsrManifest } from "../shared/Route.ts";
-import { notNil } from "../shared/Utils.ts";
-import { Chemin } from "chemin";
+import { SsrManifest } from "../shared/Route.ts";
 import { nanoid } from "nanoid";
 
 export type BuildOutputConfig = {
@@ -9,10 +7,12 @@ export type BuildOutputConfig = {
   port: number;
 };
 
+export type SsrModule = typeof import("src/ssr.ts");
+
 export type BuildOutput = {
   indexHtml: string;
-  routes: Route[];
-  notFoundRoute: Route;
+  ssr: SsrModule;
+  ssrManifest: SsrManifest;
 };
 
 let buildOutput: BuildOutput | null = null;
@@ -33,42 +33,36 @@ async function fetchBuildOutput(
   config: BuildOutputConfig,
   version: string
 ): Promise<BuildOutput> {
-  const devUrlBase = `http://localhost:${config.port}/_entx/dev/dist`;
+  const devUrlBase = `http://localhost:${config.port}/_entx/dev`;
 
   const indexHtmlProm =
     config.mode === "production"
-      ? Deno.readTextFile(resolve(Deno.cwd(), `dist/client/index.html`))
-      : fetch(`${devUrlBase}/client/index.html?v=${version}`).then((r) =>
+      ? Deno.readTextFile(resolve(Deno.cwd(), `dist/index.html`))
+      : fetch(`${devUrlBase}/dist/index.html?v=${version}`).then((r) =>
           r.text()
         );
 
-  const pagesModuleProm: Promise<typeof import("src/pages.ts")> =
+  const ssrModuleProm: Promise<typeof import("src/ssr.ts")> =
     config.mode === "production"
-      ? import(`dist/server/pages.js`)
-      : import(`${devUrlBase}/server/pages.js?v=${version}`);
+      ? import(`dist-ssr/ssr.js`)
+      : import(`${devUrlBase}/dist-ssr/ssr.js?v=${version}`);
 
   const ssrManifestProm: Promise<SsrManifest> =
     config.mode === "production"
-      ? import(`dist/client/ssr-manifest.json`, { assert: { type: "json" } })
-      : import(`${devUrlBase}/client/ssr-manifest.json?v=${version}`, {
+      ? import(`dist/ssr-manifest.json`, { assert: { type: "json" } })
+      : import(`${devUrlBase}/dist/ssr-manifest.json?v=${version}`, {
           assert: { type: "json" },
-        });
+        }).then((r) => r.default);
 
-  const [indexHtml, rootModule, ssrManifest] = await Promise.all([
+  const [indexHtml, ssrModule, ssrManifest] = await Promise.all([
     indexHtmlProm,
-    pagesModuleProm,
+    ssrModuleProm,
     ssrManifestProm,
   ]);
 
-  const routes = pagesToRoutes(rootModule.default, ssrManifest);
-
-  const notFoundRoute = notNil(
-    routes.find((route) => route.chemin.equal(Chemin.create("404")))
-  );
-
   return {
     indexHtml,
-    routes,
-    notFoundRoute,
+    ssr: ssrModule,
+    ssrManifest,
   };
 }

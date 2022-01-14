@@ -19,7 +19,6 @@ async function main() {
   console.info(`=> Building Server`);
   const server = await buildServer("development");
 
-  console.info(`=> Waiting for changes`);
   const debouncedNotifyChanges = debounce(500, notifyChanges);
 
   const onEvent = (event: RollupWatcherEvent) => {
@@ -30,4 +29,7 @@ async function main() {
 
   client.on("event", onEvent);
   server.on("event", onEvent);
+
+  debouncedNotifyChanges();
+  console.info(`=> Waiting for changes`);
 }

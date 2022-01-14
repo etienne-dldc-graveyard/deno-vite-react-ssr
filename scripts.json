@@ -6,7 +6,7 @@
       "env": { "PORT": "3001", "MODE": "development" }
     },
     "cache": {
-      "cmd": "deno cache --unstable --config=deno.json --importmap=importmap.json ./src/server.ts ./dist/server/pages.js",
+      "cmd": "deno cache --unstable --config=deno.json --importmap=importmap.json ./src/server.ts ./dist-ssr/ssr.js",
       "watch": false
     },
     "pages:build": {
@@ -20,6 +20,6 @@
   },
   "watcher": {
     "match": ["src/**/*"],
-    "skip": ["*/.git/*", "src/pages/*", "src/pages.ts"]
+    "skip": ["*/.git/*", "src/pages/*", "src/ssr.ts"]
   }
 }

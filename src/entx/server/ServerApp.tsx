@@ -7,7 +7,12 @@ import {
   Redirect,
 } from "../shared/Pages.ts";
 import { Path } from "history";
-import { matchRoute, Route, RouteMatch } from "../shared/Route.ts";
+import {
+  matchRoute,
+  pagesToRoutes,
+  Route,
+  RouteMatch,
+} from "../shared/Route.ts";
 import { getBuildOutput, invalidateBuildOutput } from "./BuildOutputManager.ts";
 import { sanitize } from "zenjson";
 import { ServerRouter } from "./ServerRouter.ts";
@@ -15,6 +20,8 @@ import { renderToString } from "react-dom/server";
 import { BRIDGE_DATA_ID, createBridgeData } from "../shared/Bridge.ts";
 import { Root } from "../shared/Root.tsx";
 import { resolve } from "std/path/mod.ts";
+import { notNil } from "../shared/Utils.ts";
+import { Chemin } from "chemin";
 
 export type { Path };
 
@@ -73,7 +80,7 @@ export class ServerApp {
       port: this.port,
     });
     const router = new ServerRouter(path, resolved.Component, resolved.props);
-    const content = renderToString(<Root router={router} />);
+    const content = this.renderToString(router);
     const assets = resolved.route.assets
       .map((asset) => `<script src="${asset}"></script>`)
       .join("\n");
@@ -108,7 +115,14 @@ export class ServerApp {
       return { kind: "json", data: body };
     }
     if (this.mode === "development") {
-      if (path.pathname.startsWith("/dev/dist")) {
+      if (path.pathname.startsWith("/dev/dist-ssr/")) {
+        const filePath = path.pathname.slice("/dev/dist-ssr".length);
+        return {
+          kind: "file",
+          path: resolve(Deno.cwd(), "dist-ssr" + filePath),
+        };
+      }
+      if (path.pathname.startsWith("/dev/dist/")) {
         const filePath = path.pathname.slice("/dev/dist".length);
         return { kind: "file", path: resolve(Deno.cwd(), "dist" + filePath) };
       }
@@ -118,6 +132,14 @@ export class ServerApp {
       }
     }
     return { kind: "notFound" };
+  }
+
+  private renderToString(router: ServerRouter): string {
+    try {
+      return renderToString(<Root router={router} />);
+    } catch (error) {
+      return "";
+    }
   }
 
   private async getProps(path: Path): Promise<PropsApiResult> {
@@ -140,12 +162,15 @@ export class ServerApp {
   }
 
   private async resolvePage(path: Path): Promise<PageResolved> {
-    const { routes, notFoundRoute } = await getBuildOutput({
+    const build = await getBuildOutput({
       mode: this.mode,
       port: this.port,
     });
+    const routes = pagesToRoutes(build.ssr.pages, build.ssrManifest);
     const notFoundRouteMatch: RouteMatch = {
-      route: notFoundRoute,
+      route: notNil(
+        routes.find((route) => route.chemin.equal(Chemin.create("404")))
+      ),
       params: {},
       isNotFound: true,
     };
