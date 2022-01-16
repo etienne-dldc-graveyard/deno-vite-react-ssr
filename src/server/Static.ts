@@ -1,6 +1,6 @@
 import { ContextSendOptions, Status } from "oak/mod.ts";
 import { Chemin, CheminParam as P } from "chemin";
-import { notNil } from "src/logic/Utils.ts";
+import { notNil } from "src/utils.ts";
 import { Middleware } from "src/server/types.ts";
 
 export const STATIC_PATH = Chemin.create(P.multiple(P.string("path")));

@@ -13,7 +13,7 @@ import { Static, STATIC_PATH } from "src/server/Static.ts";
 import { projectPath } from "src/server/Utils.ts";
 import { ServerApp } from "entx/server";
 import { Path } from "history";
-import { notNil } from "./logic/Utils.ts";
+import { notNil } from "./utils.ts";
 import { relative } from "std/path/mod.ts";
 
 const PATH = Chemin.create(P.multiple(P.string("path")));
