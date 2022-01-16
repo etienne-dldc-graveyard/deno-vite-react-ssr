@@ -16,7 +16,7 @@ export default function Home({ now }: Props) {
 
   return (
     <div>
-      Homepage: {now.toDateString()} - {now.toTimeString()} YAY
+      Homepage: {now.toDateString()} - {now.getSeconds()} !
       <div>
         <a {...clp("/demo/hello")}>/demo/hello</a>
       </div>
