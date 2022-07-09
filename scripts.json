@@ -1,6 +1,10 @@
 {
   "$schema": "https://deno.land/x/denon@2.4.9/schema.json",
   "scripts": {
+    "dev": {
+      "cmd": "deno run -A --unstable --no-check --config=deno.json --importmap=importmap.dev.json ./src/server.ts",
+      "env": { "PORT": "3001", "MODE": "development" }
+    },
     "start": {
       "cmd": "deno run -A --unstable --no-check --config=deno.json --importmap=importmap.json ./src/server.ts",
       "env": { "PORT": "3001", "MODE": "development" }
